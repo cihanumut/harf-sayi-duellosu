@@ -11,6 +11,8 @@ import {
   scoreWord,
   scoreNumbers,
   canFormWord,
+  calculateWordRoundScores,
+  calculateNumberRoundScores,
 } from '@bkbi/shared';
 import { WORDS, WORD_SET } from './dictionary.js';
 

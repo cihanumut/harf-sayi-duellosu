@@ -223,72 +223,108 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
         />
       )}
 
-      {room.phase === 'word' && round?.type === 'word' && (
-        <Panel title={`${round.roundIndex || room.currentRound || 1}/${round.totalRounds || room.totalRounds || 2}. Tur — Kelime`}>
-          {!submitted ? (
-            <WordPlay
-              key={round.endsAt}
-              letters={round.letters}
-              playerName={me?.name || 'Sen'}
-              deadline={round.endsAt}
-              onSubmit={submitWord}
-              jokers={jokers}
-              onConsumeJoker={onConsumeJoker}
-            />
-          ) : (
-            <Waiting oppSubmitted={oppSubmitted} />
-          )}
-        </Panel>
+      {room.phase === 'word' && (
+        round?.type === 'word' ? (
+          <Panel title={`${round.roundIndex || room.currentRound || 1}/${round.totalRounds || room.totalRounds || 2}. Tur — Kelime`}>
+            {!submitted ? (
+              <WordPlay
+                key={round.endsAt}
+                letters={round.letters || []}
+                playerName={me?.name || 'Sen'}
+                deadline={round.endsAt}
+                onSubmit={submitWord}
+                jokers={jokers}
+                onConsumeJoker={onConsumeJoker}
+              />
+            ) : (
+              <Waiting oppSubmitted={oppSubmitted} />
+            )}
+          </Panel>
+        ) : (
+          <Panel title="Kelime Turu Başlıyor">
+            <div className="stack stack--center" style={{ padding: '20px 0' }}>
+              <div className="spinner"></div>
+              <p className="hint">Harfler çekiliyor, oyun başlayacak…</p>
+            </div>
+          </Panel>
+        )
       )}
 
-      {room.phase === 'number' && round?.type === 'number' && (
-        <Panel title={`${round.roundIndex || room.currentRound || 2}/${round.totalRounds || room.totalRounds || 2}. Tur — Sayı`}>
-          {!submitted ? (
-            <NumberPlay
-              key={round.endsAt}
-              numbers={round.numbers}
-              target={round.target}
-              playerName={me?.name || 'Sen'}
-              deadline={round.endsAt}
-              onSubmit={submitExpr}
-              jokers={jokers}
-              onConsumeJoker={onConsumeJoker}
-            />
-          ) : (
-            <Waiting oppSubmitted={oppSubmitted} />
-          )}
-        </Panel>
+      {room.phase === 'number' && (
+        round?.type === 'number' ? (
+          <Panel title={`${round.roundIndex || room.currentRound || 2}/${round.totalRounds || room.totalRounds || 2}. Tur — Sayı`}>
+            {!submitted ? (
+              <NumberPlay
+                key={round.endsAt}
+                numbers={round.numbers || []}
+                target={round.target || 0}
+                playerName={me?.name || 'Sen'}
+                deadline={round.endsAt}
+                onSubmit={submitExpr}
+                jokers={jokers}
+                onConsumeJoker={onConsumeJoker}
+              />
+            ) : (
+              <Waiting oppSubmitted={oppSubmitted} />
+            )}
+          </Panel>
+        ) : (
+          <Panel title="Sayı Turu Başlıyor">
+            <div className="stack stack--center" style={{ padding: '20px 0' }}>
+              <div className="spinner"></div>
+              <p className="hint">Sayılar hazırlanıyor, oyun başlayacak…</p>
+            </div>
+          </Panel>
+        )
       )}
 
-      {room.phase === 'wordResult' && result?.type === 'word' && (
-        <Panel title={`Kelime Turu Sonucu (${result.roundIndex || room.currentRound || 1}/${result.totalRounds || room.totalRounds || 2})`}>
-          <LetterTiles letters={result.letters} />
-          <div className="results">
-            {result.results.map((r) => (
-              <ResultRow key={r.playerId} name={r.name} main={r.word || '—'} valid={r.valid} points={r.points} />
-            ))}
-          </div>
-          <p className="hint">En uzunlardan: {result.best.map((w) => w.toLocaleUpperCase('tr-TR')).join(', ') || '—'}</p>
-          <p className="hint">
-            {(result.roundIndex || 1) < (result.totalRounds || 2) ? 'Sonraki tur birazdan başlıyor…' : 'Sonuçlar hesaplanıyor…'}
-          </p>
-        </Panel>
+      {room.phase === 'wordResult' && (
+        result?.type === 'word' ? (
+          <Panel title={`Kelime Turu Sonucu (${result.roundIndex || room.currentRound || 1}/${result.totalRounds || room.totalRounds || 2})`}>
+            <LetterTiles letters={result.letters || []} />
+            <div className="results">
+              {(result.results || []).map((r) => (
+                <ResultRow key={r.playerId} name={r.name} main={r.word || '—'} valid={r.valid} points={r.points} />
+              ))}
+            </div>
+            <p className="hint">En uzunlardan: {(result.best || []).map((w) => w.toLocaleUpperCase('tr-TR')).join(', ') || '—'}</p>
+            <p className="hint">
+              {(result.roundIndex || 1) < (result.totalRounds || 2) ? 'Sonraki tur birazdan başlıyor…' : 'Sonuçlar hesaplanıyor…'}
+            </p>
+          </Panel>
+        ) : (
+          <Panel title="Kelime Turu Sonucu">
+            <div className="stack stack--center" style={{ padding: '20px 0' }}>
+              <div className="spinner"></div>
+              <p className="hint">Puanlar hesaplanıyor…</p>
+            </div>
+          </Panel>
+        )
       )}
 
-      {room.phase === 'numberResult' && result?.type === 'number' && (
-        <Panel title={`Sayı Turu Sonucu (${result.roundIndex || room.currentRound || 2}/${result.totalRounds || room.totalRounds || 2})`}>
-          <div className="target">Hedef: <strong>{result.target}</strong></div>
-          <NumberTiles numbers={result.numbers} />
-          <div className="results">
-            {result.results.map((r) => (
-              <ResultRow key={r.playerId} name={r.name} main={r.value != null ? `${r.value}` : '—'} sub={r.expr} valid={r.valid} points={r.points} />
-            ))}
-          </div>
-          <p className="hint">En iyi: {result.best ? `${result.best.value} = ${result.best.expr}` : '—'}</p>
-          <p className="hint">
-            {(result.roundIndex || 2) < (result.totalRounds || 2) ? 'Sonraki tur birazdan başlıyor…' : 'Oyun tamamlanıyor…'}
-          </p>
-        </Panel>
+      {room.phase === 'numberResult' && (
+        result?.type === 'number' ? (
+          <Panel title={`Sayı Turu Sonucu (${result.roundIndex || room.currentRound || 2}/${result.totalRounds || room.totalRounds || 2})`}>
+            <div className="target">Hedef: <strong>{result.target}</strong></div>
+            <NumberTiles numbers={result.numbers || []} />
+            <div className="results">
+              {(result.results || []).map((r) => (
+                <ResultRow key={r.playerId} name={r.name} main={r.value != null ? `${r.value}` : '—'} sub={r.expr} valid={r.valid} points={r.points} />
+              ))}
+            </div>
+            <p className="hint">En iyi: {result.best ? `${result.best.value} = ${result.best.expr}` : '—'}</p>
+            <p className="hint">
+              {(result.roundIndex || 2) < (result.totalRounds || 2) ? 'Sonraki tur birazdan başlıyor…' : 'Oyun tamamlanıyor…'}
+            </p>
+          </Panel>
+        ) : (
+          <Panel title="Sayı Turu Sonucu">
+            <div className="stack stack--center" style={{ padding: '20px 0' }}>
+              <div className="spinner"></div>
+              <p className="hint">Sonuçlar yükleniyor…</p>
+            </div>
+          </Panel>
+        )
       )}
 
       {room.phase === 'over' && over && (

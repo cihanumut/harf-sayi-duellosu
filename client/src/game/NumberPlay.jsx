@@ -6,12 +6,14 @@ import JokerBar from '../components/JokerBar.jsx';
 
 const SECONDS = 45;
 
-export default function NumberPlay({ numbers, target, playerName, onSubmit, deadline, jokers, onConsumeJoker }) {
+export default function NumberPlay({ numbers = [], target = 0, playerName, onSubmit, deadline, jokers, onConsumeJoker }) {
   const [tokens, setTokens] = useState([]);
   const [jokerHintText, setJokerHintText] = useState(null);
   const done = useRef(false);
 
-  const [localRemaining, addLocalTime] = useCountdown(SECONDS, !deadline, finish, `${numbers.join()}-${target}`);
+  const safeNumbers = Array.isArray(numbers) ? numbers : [];
+
+  const [localRemaining, addLocalTime] = useCountdown(SECONDS, !deadline, finish, `${safeNumbers.join()}-${target}`);
   const [deadlineRemaining, addDeadlineTime] = useDeadline(deadline, finish);
   const remaining = deadline ? deadlineRemaining : localRemaining;
 

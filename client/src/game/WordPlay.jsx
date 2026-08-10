@@ -7,13 +7,15 @@ import JokerBar from '../components/JokerBar.jsx';
 
 const SECONDS = 30;
 
-export default function WordPlay({ letters, playerName, onSubmit, deadline, jokers, onConsumeJoker }) {
+export default function WordPlay({ letters = [], playerName, onSubmit, deadline, jokers, onConsumeJoker }) {
   const [word, setWord] = useState('');
   const [jokerHintText, setJokerHintText] = useState(null);
   const done = useRef(false);
 
+  const safeLetters = Array.isArray(letters) ? letters : [];
+
   // Online modda sunucu zaman damgasına (deadline), offline'da yerel sayaca göre.
-  const [localRemaining, addLocalTime] = useCountdown(SECONDS, !deadline, finish, letters.join(''));
+  const [localRemaining, addLocalTime] = useCountdown(SECONDS, !deadline, finish, safeLetters.join(''));
   const [deadlineRemaining, addDeadlineTime] = useDeadline(deadline, finish);
   const remaining = deadline ? deadlineRemaining : localRemaining;
 
