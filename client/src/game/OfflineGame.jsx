@@ -17,7 +17,7 @@ import NumberPlay from './NumberPlay.jsx';
 import { LetterTiles, NumberTiles, Panel, Scoreboard } from '../components/GameBits.jsx';
 
 // mode: 'cpu' | '2p'
-export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCoins }) {
+export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCoins, jokers, onConsumeJoker }) {
   const humans = mode === 'cpu' ? [0] : [0, 1];
   const [players, setPlayers] = useState([
     { name: names[0], score: 0 },
@@ -51,71 +51,73 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
     startTurn(0);
   }
 
-  function submitWord(word) {
-    const idx = humans[turnIdx];
-    const next = { ...answers, [idx]: word };
-    setAnswers(next);
+  function submitWord(wordRaw) {
+    const pIdx = humans[turnIdx];
+    const newAnswers = { ...answers, [pIdx]: wordRaw };
+    setAnswers(newAnswers);
+
     if (turnIdx + 1 < humans.length) {
       startTurn(turnIdx + 1);
-    } else {
-      finishWord(next);
+      return;
     }
-  }
 
-  function finishWord(collected) {
-    const results = players.map((p, i) => {
-      let word;
-      if (humans.includes(i)) {
-        word = (collected[i] || '').trim();
-      } else {
-        word = cpuWord(letters, difficulty); // bilgisayar
-      }
-      const w = trLower(word);
-      const valid = word.length >= 2 && WORD_SET.has(w) && canFormWord(word, letters);
-      const points = scoreWord(word, { valid });
-      return { name: p.name, word, valid, points };
-    });
-    addScores(results.map((r) => r.points));
-    setWordResults(results);
-    setBestWords(findLongestWords(letters, WORDS, 3));
+    if (mode === 'cpu') {
+      const cpuAns = cpuWord(letters, difficulty);
+      newAnswers[1] = cpuAns;
+    }
+
+    const res0 = scoreWord(newAnswers[0], letters, WORD_SET);
+    const res1 = scoreWord(newAnswers[1], letters, WORD_SET);
+    const deltas = [res0.points, res1.points];
+    addScores(deltas);
+
+    setWordResults([
+      { name: players[0].name, ...res0 },
+      { name: players[1].name, ...res1 },
+    ]);
+    setBestWords(findLongestWords(letters, WORDS));
     setPhase('wordResult');
   }
 
   // ---- Sayı turu ----
-  function onNumbersReady(nums, tgt) {
-    setNumbers(nums);
-    setTarget(tgt);
+  function onNumbersReady({ numbers: ns, target: t }) {
+    setNumbers(ns);
+    setTarget(t);
     setAnswers({});
     setPhase('numberPlay');
     startTurn(0);
   }
 
-  function submitExpr(expr) {
-    const idx = humans[turnIdx];
-    const next = { ...answers, [idx]: expr };
-    setAnswers(next);
+  function submitExpr(exprRaw) {
+    const pIdx = humans[turnIdx];
+    const newAnswers = { ...answers, [pIdx]: exprRaw };
+    setAnswers(newAnswers);
+
     if (turnIdx + 1 < humans.length) {
       startTurn(turnIdx + 1);
-    } else {
-      finishNumber(next);
+      return;
     }
-  }
 
-  function finishNumber(collected) {
-    const results = players.map((p, i) => {
-      if (humans.includes(i)) {
-        const expr = (collected[i] || '').trim();
-        const ev = expr ? evaluateExpression(expr, numbers) : { ok: false };
-        const value = ev.ok ? ev.value : null;
-        const points = ev.ok ? scoreNumbers(value, target) : 0;
-        return { name: p.name, expr, value, valid: ev.ok, points };
-      }
-      const cpu = cpuNumbers(numbers, target, difficulty);
-      const points = scoreNumbers(cpu.value, target);
-      return { name: p.name, expr: cpu.expr, value: cpu.value, valid: true, points };
-    });
-    addScores(results.map((r) => r.points));
-    setNumberResults(results);
+    if (mode === 'cpu') {
+      const cpuAns = cpuNumbers(numbers, target, difficulty);
+      newAnswers[1] = cpuAns;
+    }
+
+    const res0 = scoreNumbers(newAnswers[0], numbers, target);
+    const res1 = scoreNumbers(newAnswers[1], numbers, target);
+
+    let maxPts = Math.max(res0.points, res1.points);
+    if (maxPts === 0) maxPts = -1;
+    const deltas = [
+      res0.points === maxPts ? res0.points : 0,
+      res1.points === maxPts ? res1.points : 0,
+    ];
+    addScores(deltas);
+
+    setNumberResults([
+      { name: players[0].name, ...res0 },
+      { name: players[1].name, ...res1 },
+    ]);
     setBestNumber(solveNumbers(numbers, target));
     setPhase('numberResult');
   }
@@ -149,6 +151,8 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
             letters={letters}
             playerName={players[humans[turnIdx]].name}
             onSubmit={submitWord}
+            jokers={jokers}
+            onConsumeJoker={onConsumeJoker}
           />
         </Panel>
       )}
@@ -189,6 +193,8 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
             target={target}
             playerName={players[humans[turnIdx]].name}
             onSubmit={submitExpr}
+            jokers={jokers}
+            onConsumeJoker={onConsumeJoker}
           />
         </Panel>
       )}

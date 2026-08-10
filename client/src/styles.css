@@ -932,13 +932,287 @@ body {
   }
 }
 
+/* Market & Joker Styles */
+.header-bar__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-bar__market-btn {
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #ffdc73;
+  background: rgba(255, 203, 71, 0.15);
+  border: 1px solid rgba(255, 203, 71, 0.4);
+  border-radius: 99px;
+  padding: 6px 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.18s ease;
+}
+
+.header-bar__market-btn:hover {
+  background: rgba(255, 203, 71, 0.3);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 203, 71, 0.25);
+}
+
+.mode-card--gold {
+  background: linear-gradient(145deg, rgba(50, 40, 20, 0.9), rgba(30, 24, 12, 0.95));
+  border-color: rgba(255, 203, 71, 0.4);
+}
+
+.mode-card--gold:hover {
+  border-color: rgba(255, 203, 71, 0.7);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 203, 71, 0.3);
+}
+
+.stat-pill__action {
+  font-size: 0.78rem;
+  padding: 2px 8px;
+  background: rgba(255, 203, 71, 0.2);
+  border-radius: 99px;
+  color: #fde047;
+  font-weight: 800;
+}
+
+/* Market Modal */
+.market-modal {
+  max-width: 540px;
+  width: 90%;
+}
+
+.market-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 14px;
+}
+
+.market-modal__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 900;
+  background: linear-gradient(135deg, #ffd866, #ffb01f);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.market-modal__sub {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+  color: #94a3b8;
+}
+
+.market-modal__coins {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 203, 71, 0.15);
+  border: 1px solid rgba(255, 203, 71, 0.4);
+  padding: 6px 14px;
+  border-radius: 99px;
+}
+
+.market-modal__coin-icon {
+  font-size: 1.2rem;
+}
+
+.market-modal__coin-val {
+  font-weight: 900;
+  font-size: 1.1rem;
+  color: #ffdc73;
+}
+
+.market-feedback {
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+  text-align: center;
+  animation: fadeIn 0.2s ease;
+}
+
+.market-feedback--success {
+  background: rgba(52, 211, 153, 0.2);
+  border: 1px solid #34d399;
+  color: #34d399;
+}
+
+.market-feedback--error {
+  background: rgba(248, 113, 113, 0.2);
+  border: 1px solid #f87171;
+  color: #f87171;
+}
+
+.market-items {
+  gap: 12px;
+}
+
+.market-item {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: rgba(16, 20, 48, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  text-align: left;
+}
+
+.market-item__icon {
+  font-size: 2rem;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.market-item__info {
+  flex: 1;
+}
+
+.market-item__title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.market-item__name {
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.market-item__owned {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #a0aec0;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 2px 8px;
+  border-radius: 99px;
+}
+
+.market-item__desc {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #94a3b8;
+  line-height: 1.35;
+}
+
+.market-item__buy-btn {
+  padding: 10px 16px;
+  font-size: 0.9rem;
+  min-width: 90px;
+  white-space: nowrap;
+}
+
+.market-modal__footer {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+}
+
+/* In-game Joker Bar */
+.joker-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 14px;
+  background: rgba(16, 20, 48, 0.6);
+  border: 1px solid rgba(123, 108, 255, 0.25);
+  border-radius: 16px;
+  margin-bottom: 12px;
+}
+
+.joker-bar__title {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #c4b5fd;
+}
+
+.joker-bar__items {
+  display: flex;
+  gap: 8px;
+}
+
+.joker-btn {
+  position: relative;
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, rgba(109, 92, 255, 0.3), rgba(139, 92, 246, 0.4));
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 12px;
+  color: #fff;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.joker-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(109, 92, 255, 0.6), rgba(139, 92, 246, 0.7));
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(109, 92, 255, 0.4);
+}
+
+.joker-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  filter: grayscale(0.6);
+}
+
+.joker-btn__badge {
+  font-size: 0.72rem;
+  font-weight: 900;
+  background: #ffcb47;
+  color: #000;
+  border-radius: 99px;
+  padding: 1px 6px;
+  margin-left: 2px;
+}
+
+.joker-hint-box {
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(255, 203, 71, 0.15), rgba(245, 158, 11, 0.25));
+  border: 1px solid rgba(255, 203, 71, 0.4);
+  border-radius: 14px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #fde047;
+  text-align: center;
+  margin-bottom: 12px;
+  animation: fadeIn 0.3s ease;
+}
+
 @media (max-width: 480px) {
   .tile { width: 44px; height: 52px; font-size: 1.45rem; border-radius: 11px; }
   .scoreboard { flex-direction: column; gap: 6px; }
   .game__top { justify-content: center; }
   .modal-card { padding: 20px; }
   .big-code { font-size: 2.2rem; letter-spacing: 8px; }
+  .header-bar__market-label { display: none; }
+  .market-item { flex-direction: column; align-items: stretch; text-align: center; }
+  .market-item__icon { margin: 0 auto; }
 }
+
 
 
 

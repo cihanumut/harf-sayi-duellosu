@@ -1,6 +1,6 @@
 import { Panel } from '../components/GameBits.jsx';
 
-export default function MainMenu({ onOffline, onOnline, coins }) {
+export default function MainMenu({ onOffline, onOnline, onOpenMarket, coins }) {
   return (
     <div className="menu">
       <div className="menu__hero">
@@ -35,14 +35,24 @@ export default function MainMenu({ onOffline, onOnline, coins }) {
             </div>
             <div className="mode-card__badge mode-card__badge--gold">+50 🪙 Ödül</div>
           </button>
+
+          <button className="mode-card mode-card--gold" onClick={onOpenMarket}>
+            <div className="mode-card__icon">🛒</div>
+            <div className="mode-card__info">
+              <span className="mode-card__title">Joker Mağazası</span>
+              <span className="mode-card__desc">İpucu, ek süre ve işlem yardımcısı satın al</span>
+            </div>
+            <div className="mode-card__badge mode-card__badge--gold">Mağaza</div>
+          </button>
         </div>
       </Panel>
 
       <div className="menu__stats">
-        <div className="stat-pill">
+        <div className="stat-pill" onClick={onOpenMarket} style={{ cursor: 'pointer' }}>
           <span className="stat-pill__icon">🪙</span>
           <span className="stat-pill__label">Mevcut Bakiyeniz:</span>
           <strong className="stat-pill__val">{coins} Coin</strong>
+          <span className="stat-pill__action">🛒 Mağaza</span>
         </div>
       </div>
 

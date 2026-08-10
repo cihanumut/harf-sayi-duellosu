@@ -1,16 +1,43 @@
 import { useMemo, useRef, useState } from 'react';
-import { evaluateExpression } from '@bkbi/shared';
+import { evaluateExpression, solveNumbers } from '@bkbi/shared';
 import { useCountdown, useDeadline } from './useCountdown.js';
 import { NumberTiles, Timer } from '../components/GameBits.jsx';
+import JokerBar from '../components/JokerBar.jsx';
 
 const SECONDS = 45;
 
-export default function NumberPlay({ numbers, target, playerName, onSubmit, deadline }) {
+export default function NumberPlay({ numbers, target, playerName, onSubmit, deadline, jokers, onConsumeJoker }) {
   const [tokens, setTokens] = useState([]);
+  const [jokerHintText, setJokerHintText] = useState(null);
   const done = useRef(false);
-  const localRemaining = useCountdown(SECONDS, !deadline, finish, `${numbers.join()}-${target}`);
-  const deadlineRemaining = useDeadline(deadline, finish);
+
+  const [localRemaining, addLocalTime] = useCountdown(SECONDS, !deadline, finish, `${numbers.join()}-${target}`);
+  const [deadlineRemaining, addDeadlineTime] = useDeadline(deadline, finish);
   const remaining = deadline ? deadlineRemaining : localRemaining;
+
+  function finish() {
+    if (done.current) return;
+    done.current = true;
+    onSubmit(exprString.trim());
+  }
+
+  const handleUseTargetHint = () => {
+    if (onConsumeJoker && onConsumeJoker('targetHint')) {
+      const solution = solveNumbers(numbers, target);
+      if (solution && solution.expr) {
+        setJokerHintText(`🎯 İşlem İpucu: Çözüm var! (${solution.value} hedefine ulaşmak için "${solution.expr}" yapılabilir)`);
+      } else {
+        setJokerHintText('🎯 İşlem İpucu: Sayıları büyükten küçüğe doğru çarparak veya toplayarak hedefe yaklaşabilirsiniz.');
+      }
+    }
+  };
+
+  const handleAddExtraTime = () => {
+    if (onConsumeJoker && onConsumeJoker('extraTime')) {
+      if (deadline) addDeadlineTime(15);
+      else addLocalTime(15);
+    }
+  };
 
   // Her sayı, havuzdaki adedi kadar kullanılabilir. tokens içindeki kullanımları say.
   const usedCounts = useMemo(() => {
@@ -21,21 +48,9 @@ export default function NumberPlay({ numbers, target, playerName, onSubmit, dead
     return m;
   }, [tokens]);
 
-  const poolCounts = useMemo(() => {
-    const m = new Map();
-    for (const n of numbers) m.set(String(n), (m.get(String(n)) || 0) + 1);
-    return m;
-  }, [numbers]);
-
   const exprString = tokens.join(' ');
   const evalRes = tokens.length ? evaluateExpression(exprString, numbers) : null;
   const value = evalRes?.ok ? evalRes.value : null;
-
-  function finish() {
-    if (done.current) return;
-    done.current = true;
-    onSubmit(exprString.trim());
-  }
 
   const add = (t) => setTokens((prev) => [...prev, t]);
   const backspace = () => setTokens((prev) => prev.slice(0, -1));
@@ -70,6 +85,22 @@ export default function NumberPlay({ numbers, target, playerName, onSubmit, dead
     <div className="stack">
       <p className="turn-label">Sıra: <strong>{playerName}</strong></p>
       <Timer remaining={remaining} total={SECONDS} />
+      
+      {jokers && (
+        <JokerBar
+          mode="number"
+          jokers={jokers}
+          onUseTargetHint={handleUseTargetHint}
+          onAddExtraTime={handleAddExtraTime}
+        />
+      )}
+
+      {jokerHintText && (
+        <div className="joker-hint-box">
+          {jokerHintText}
+        </div>
+      )}
+
       <div className="target">Hedef: <strong>{target}</strong></div>
       <NumberTiles numbers={numbers} />
 

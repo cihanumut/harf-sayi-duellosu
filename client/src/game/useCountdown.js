@@ -21,7 +21,9 @@ export function useCountdown(seconds, active, onDone, key) {
     return () => clearTimeout(id);
   }, [active, remaining, key]);
 
-  return remaining;
+  const addTime = (secs) => setRemaining((r) => r + secs);
+
+  return [remaining, addTime];
 }
 
 // Hedef zaman damgasına (endsAt) göre geri sayım — online mod için (sunucu senkronu).
@@ -45,8 +47,10 @@ export function useDeadline(endsAt, onDone) {
     };
     tick();
     const id = setInterval(tick, 250);
-    return () => clearInterval(id);
+    return () => clearTimeout(id);
   }, [endsAt]);
 
-  return remaining;
+  const addTime = (secs) => setRemaining((r) => r + secs);
+
+  return [remaining, addTime];
 }

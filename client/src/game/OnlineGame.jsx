@@ -227,6 +227,8 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
               playerName={me?.name || 'Sen'}
               deadline={round.endsAt}
               onSubmit={submitWord}
+              jokers={jokers}
+              onConsumeJoker={onConsumeJoker}
             />
           ) : (
             <Waiting oppSubmitted={oppSubmitted} />
@@ -244,6 +246,8 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
               playerName={me?.name || 'Sen'}
               deadline={round.endsAt}
               onSubmit={submitExpr}
+              jokers={jokers}
+              onConsumeJoker={onConsumeJoker}
             />
           ) : (
             <Waiting oppSubmitted={oppSubmitted} />

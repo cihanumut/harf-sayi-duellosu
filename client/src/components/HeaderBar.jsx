@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function HeaderBar({ coins, lastReward }) {
+export default function HeaderBar({ coins, lastReward, onOpenMarket }) {
   const [pop, setPop] = useState(false);
 
   useEffect(() => {
@@ -18,12 +18,20 @@ export default function HeaderBar({ coins, lastReward }) {
         <span className="header-bar__name">Oyuncu</span>
       </div>
 
-      <div className={`header-bar__coin-badge ${pop ? 'header-bar__coin-badge--pop' : ''}`}>
-        <span className="header-bar__coin-icon">🪙</span>
-        <span className="header-bar__coin-val">{coins.toLocaleString('tr-TR')}</span>
-        {pop && lastReward > 0 && (
-          <span className="header-bar__reward-floater">+{lastReward}</span>
+      <div className="header-bar__actions">
+        {onOpenMarket && (
+          <button className="header-bar__market-btn" onClick={onOpenMarket} title="Joker Mağazası">
+            🛒 <span className="header-bar__market-label">Mağaza</span>
+          </button>
         )}
+
+        <div className={`header-bar__coin-badge ${pop ? 'header-bar__coin-badge--pop' : ''}`}>
+          <span className="header-bar__coin-icon">🪙</span>
+          <span className="header-bar__coin-val">{coins.toLocaleString('tr-TR')}</span>
+          {pop && lastReward > 0 && (
+            <span className="header-bar__reward-floater">+{lastReward}</span>
+          )}
+        </div>
       </div>
     </header>
   );
