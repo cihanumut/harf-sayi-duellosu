@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Harf &amp; Sayı Düellosu</string>
+    <string name="title_activity_main">Harf &amp; Sayı Düellosu</string>
+    <string name="package_name">com.harfsayiduellosu.app</string>
+    <string name="custom_url_scheme">com.harfsayiduellosu.app</string>
+</resources>

@@ -1,0 +1,9 @@
+{
+  "appId": "com.harfsayiduellosu.app",
+  "appName": "Harf & Sayı Düellosu",
+  "webDir": "dist",
+  "backgroundColor": "#0f172aff",
+  "android": {
+    "backgroundColor": "#0f172aff"
+  }
+}

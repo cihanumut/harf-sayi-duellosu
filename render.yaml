@@ -1,0 +1,8 @@
+services:
+  - type: web
+    name: bir-kelime-bir-islem-server
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: npm --workspace server run start
+    healthCheckPath: /health

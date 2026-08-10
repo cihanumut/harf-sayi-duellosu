@@ -1,0 +1,95 @@
+import { useMemo, useRef, useState } from 'react';
+import { evaluateExpression } from '@bkbi/shared';
+import { useCountdown, useDeadline } from './useCountdown.js';
+import { NumberTiles, Timer } from '../components/GameBits.jsx';
+
+const SECONDS = 45;
+
+export default function NumberPlay({ numbers, target, playerName, onSubmit, deadline }) {
+  const [tokens, setTokens] = useState([]);
+  const done = useRef(false);
+  const localRemaining = useCountdown(SECONDS, !deadline, finish, `${numbers.join()}-${target}`);
+  const deadlineRemaining = useDeadline(deadline, finish);
+  const remaining = deadline ? deadlineRemaining : localRemaining;
+
+  // Her sayı, havuzdaki adedi kadar kullanılabilir. tokens içindeki kullanımları say.
+  const usedCounts = useMemo(() => {
+    const m = new Map();
+    for (const t of tokens) {
+      if (/^\d+$/.test(t)) m.set(t, (m.get(t) || 0) + 1);
+    }
+    return m;
+  }, [tokens]);
+
+  const poolCounts = useMemo(() => {
+    const m = new Map();
+    for (const n of numbers) m.set(String(n), (m.get(String(n)) || 0) + 1);
+    return m;
+  }, [numbers]);
+
+  const exprString = tokens.join(' ');
+  const evalRes = tokens.length ? evaluateExpression(exprString, numbers) : null;
+  const value = evalRes?.ok ? evalRes.value : null;
+
+  function finish() {
+    if (done.current) return;
+    done.current = true;
+    onSubmit(exprString.trim());
+  }
+
+  const add = (t) => setTokens((prev) => [...prev, t]);
+  const backspace = () => setTokens((prev) => prev.slice(0, -1));
+  const clear = () => setTokens([]);
+
+  // Sayı çipleri: her sayı örneğini ayrı buton yap, kullanılınca pasifleştir.
+  const chipButtons = [];
+  const seen = new Map();
+  numbers.forEach((n, i) => {
+    const key = String(n);
+    const idx = seen.get(key) || 0;
+    seen.set(key, idx + 1);
+    const used = (usedCounts.get(key) || 0) > idx;
+    chipButtons.push(
+      <button
+        key={i}
+        className="chip"
+        disabled={used}
+        onClick={() => add(key)}
+      >
+        {n}
+      </button>
+    );
+  });
+
+  const diff = value != null ? Math.abs(value - target) : null;
+  let valClass = 'value-display';
+  if (diff === 0) valClass += ' value-display--exact';
+  else if (diff != null && diff <= 10) valClass += ' value-display--close';
+
+  return (
+    <div className="stack">
+      <p className="turn-label">Sıra: <strong>{playerName}</strong></p>
+      <Timer remaining={remaining} total={SECONDS} />
+      <div className="target">Hedef: <strong>{target}</strong></div>
+      <NumberTiles numbers={numbers} />
+
+      <div className="expr">{exprString || ' '}</div>
+      <div className={valClass}>
+        {value != null ? `= ${value}` : evalRes && !evalRes.ok ? evalRes.error : ' '}
+      </div>
+
+      <div className="chip-row">{chipButtons}</div>
+      <div className="chip-row">
+        {['+', '-', '×', '÷', '(', ')'].map((op) => (
+          <button key={op} className="chip chip--op" onClick={() => add(op)}>
+            {op}
+          </button>
+        ))}
+        <button className="chip chip--util" onClick={backspace}>←</button>
+        <button className="chip chip--util" onClick={clear}>Temizle</button>
+      </div>
+
+      <button className="btn btn--primary" onClick={finish}>Onayla</button>
+    </div>
+  );
+}
