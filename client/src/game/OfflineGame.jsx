@@ -82,7 +82,16 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
   }
 
   // ---- Sayı turu ----
-  function onNumbersReady({ numbers: ns, target: t }) {
+  function onNumbersReady(arg1, arg2) {
+    let ns = [];
+    let t = 0;
+    if (Array.isArray(arg1)) {
+      ns = arg1;
+      t = arg2;
+    } else if (arg1 && typeof arg1 === 'object') {
+      ns = arg1.numbers || [];
+      t = arg1.target || 0;
+    }
     setNumbers(ns);
     setTarget(t);
     setAnswers({});
