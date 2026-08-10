@@ -4,7 +4,7 @@ import WordPlay from './WordPlay.jsx';
 import NumberPlay from './NumberPlay.jsx';
 import { LetterTiles, NumberTiles, Panel, Scoreboard } from '../components/GameBits.jsx';
 
-export default function OnlineGame({ onExit, onAwardCoins }) {
+export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoker }) {
   const [name, setName] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [connected, setConnected] = useState(false);
@@ -214,6 +214,7 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
       </div>
 
       {notice && <p className="hint hint--bad">{notice}</p>}
+      {error && <p className="hint hint--bad">{error}</p>}
 
       {room.phase === 'lobby' && (
         <Panel title="Bekleme Odası">
