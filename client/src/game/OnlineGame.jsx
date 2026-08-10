@@ -165,15 +165,23 @@ export default function OnlineGame({ onExit }) {
             <p className="hint">Arkadaşına bu kodu ver:</p>
             <div className="big-code">{room.code}</div>
 
-            {/* Oda Ayarları Rozetleri */}
-            <div className="room-settings-badges">
-              <span className="setting-badge">⏱️ Kelime: {room.settings?.wordTimeMs / 1000}s</span>
-              <span className="setting-badge">🔢 Sayı: {room.settings?.numberTimeMs / 1000}s</span>
-              <span className="setting-badge">👥 Kapasite: {room.players?.length}/{maxPlayers}</span>
-              <span className="setting-badge">🔄 {room.settings?.totalRounds} Tur</span>
-              <span className="setting-badge">
-                🎲 Büyük Sayı: {room.settings?.bigCountMode === 'random' ? 'Rastgele' : `${room.settings?.bigCountMode} Adet`}
-              </span>
+            {/* Oda Ayarları Kartı */}
+            <div className="settings-card">
+              <div className="settings-card__header">⚙️ Oda Ayarları & Kurallar</div>
+              <div className="room-settings-badges">
+                <span className="setting-badge">⏱️ Kelime: {room.settings?.wordTimeMs / 1000} sn</span>
+                <span className="setting-badge">🔢 Sayı: {room.settings?.numberTimeMs / 1000} sn</span>
+                <span className="setting-badge">👥 Kapasite: {room.players?.length}/{maxPlayers} Oyuncu</span>
+                <span className="setting-badge">🔄 Toplam {room.settings?.totalRounds} Tur</span>
+                <span className="setting-badge">
+                  🎲 Büyük Sayı: {room.settings?.bigCountMode === 'random' ? 'Rastgele (1-3)' : `${room.settings?.bigCountMode} Adet`}
+                </span>
+              </div>
+              {isHost && (
+                <button className="btn btn--ghost" style={{ marginTop: '4px', fontSize: '0.9rem' }} onClick={() => setShowSettings(true)}>
+                  ⚙️ Ayarları Düzenle
+                </button>
+              )}
             </div>
 
             <div className="lobby-players">
@@ -187,18 +195,12 @@ export default function OnlineGame({ onExit }) {
               )}
             </div>
 
-            {isHost && (
-              <button className="btn btn--ghost" onClick={() => setShowSettings(true)}>
-                ⚙️ Oda Ayarlarını Düzenle
-              </button>
-            )}
-
             {isHost ? (
               <button className="btn btn--primary btn--big" disabled={room.players.length < 2} onClick={startGame}>
                 Oyunu Başlat
               </button>
             ) : (
-              <p className="hint">Kurucunun başlatması bekleniyor…</p>
+              <p className="hint">Kurucunun oyunu başlatması bekleniyor…</p>
             )}
           </div>
         </Panel>
@@ -311,17 +313,17 @@ function RoomSettingsModal({ settings, onSave, onClose }) {
   }
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-card">
-        <h3 className="modal-title">⚙️ Oda Ayarları</h3>
-        <div className="stack">
-          <div>
-            <label className="field-label">Kelime Turu Süresi</label>
-            <div className="btn-row">
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
+        <h3 className="modal-title">⚙️ Oda Ayarlarını Özelleştir</h3>
+        <div className="stack" style={{ gap: '10px' }}>
+          <div className="settings-group-card">
+            <label className="field-label">⏱️ Kelime Turu Süresi</label>
+            <div className="pill-group">
               {[20000, 30000, 45000, 60000].map((ms) => (
                 <button
                   key={ms}
-                  className={`btn ${wordTimeMs === ms ? 'btn--primary' : ''}`}
+                  className={`pill-btn ${wordTimeMs === ms ? 'pill-btn--active' : ''}`}
                   onClick={() => setWordTimeMs(ms)}
                 >
                   {ms / 1000} sn
@@ -330,13 +332,13 @@ function RoomSettingsModal({ settings, onSave, onClose }) {
             </div>
           </div>
 
-          <div>
-            <label className="field-label">Sayı Turu Süresi</label>
-            <div className="btn-row">
+          <div className="settings-group-card">
+            <label className="field-label">🔢 Sayı Turu Süresi</label>
+            <div className="pill-group">
               {[30000, 45000, 60000, 90000].map((ms) => (
                 <button
                   key={ms}
-                  className={`btn ${numberTimeMs === ms ? 'btn--primary' : ''}`}
+                  className={`pill-btn ${numberTimeMs === ms ? 'pill-btn--active' : ''}`}
                   onClick={() => setNumberTimeMs(ms)}
                 >
                   {ms / 1000} sn
@@ -345,13 +347,13 @@ function RoomSettingsModal({ settings, onSave, onClose }) {
             </div>
           </div>
 
-          <div>
-            <label className="field-label">Maksimum Oyuncu Kapasitesi</label>
-            <div className="btn-row">
+          <div className="settings-group-card">
+            <label className="field-label">👥 Maksimum Oyuncu Kapasitesi</label>
+            <div className="pill-group">
               {[2, 3, 4].map((count) => (
                 <button
                   key={count}
-                  className={`btn ${maxPlayers === count ? 'btn--primary' : ''}`}
+                  className={`pill-btn ${maxPlayers === count ? 'pill-btn--active' : ''}`}
                   onClick={() => setMaxPlayers(count)}
                 >
                   {count} Oyuncu
@@ -360,24 +362,24 @@ function RoomSettingsModal({ settings, onSave, onClose }) {
             </div>
           </div>
 
-          <div>
-            <label className="field-label">Toplam Tur Sayısı</label>
-            <div className="btn-row">
+          <div className="settings-group-card">
+            <label className="field-label">🔄 Toplam Tur Sayısı</label>
+            <div className="pill-group">
               {[2, 4, 6].map((count) => (
                 <button
                   key={count}
-                  className={`btn ${totalRounds === count ? 'btn--primary' : ''}`}
+                  className={`pill-btn ${totalRounds === count ? 'pill-btn--active' : ''}`}
                   onClick={() => setTotalRounds(count)}
                 >
-                  {count} Tur ({count / 2} Kelime + {count / 2} Sayı)
+                  {count} Tur ({count / 2}K + {count / 2}S)
                 </button>
               ))}
             </div>
           </div>
 
-          <div>
-            <label className="field-label">Büyük Sayı Kuralı</label>
-            <div className="btn-row">
+          <div className="settings-group-card">
+            <label className="field-label">🎲 Büyük Sayı Seçim Kuralı</label>
+            <div className="pill-group">
               {[
                 { val: 'random', label: 'Rastgele (1-3)' },
                 { val: 1, label: '1 Adet' },
@@ -386,7 +388,7 @@ function RoomSettingsModal({ settings, onSave, onClose }) {
               ].map((opt) => (
                 <button
                   key={opt.val}
-                  className={`btn ${bigCountMode === opt.val ? 'btn--primary' : ''}`}
+                  className={`pill-btn ${bigCountMode === opt.val ? 'pill-btn--active' : ''}`}
                   onClick={() => setBigCountMode(opt.val)}
                 >
                   {opt.label}
@@ -395,8 +397,10 @@ function RoomSettingsModal({ settings, onSave, onClose }) {
             </div>
           </div>
 
-          <div className="btn-row" style={{ marginTop: '12px' }}>
-            <button className="btn btn--primary" onClick={handleSave}>Kaydet</button>
+          <div className="btn-row" style={{ marginTop: '14px' }}>
+            <button className="btn btn--primary btn--big" style={{ minWidth: '140px' }} onClick={handleSave}>
+              Kaydet & Uygula
+            </button>
             <button className="btn btn--ghost" onClick={onClose}>Vazgeç</button>
           </div>
         </div>
