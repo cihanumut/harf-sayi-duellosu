@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { getSocket } from '../net/socket.js';
 import WordPlay from './WordPlay.jsx';
 import NumberPlay from './NumberPlay.jsx';
@@ -21,6 +21,11 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
 
   const [showSettings, setShowSettings] = useState(false);
 
+  const roomRef = useRef(room);
+  roomRef.current = room;
+  const playerIdRef = useRef(playerId);
+  playerIdRef.current = playerId;
+
   useEffect(() => {
     const socket = getSocket();
     setConnected(socket.connected);
@@ -28,12 +33,17 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
     const onConnect = () => {
       setConnected(true);
       setError('');
-      if (room?.code && playerId) {
-        getSocket().emit('rejoinRoom', { code: room.code, playerId });
+      if (roomRef.current?.code && playerIdRef.current) {
+        socket.emit('rejoinRoom', { code: roomRef.current.code, playerId: playerIdRef.current });
       }
     };
     const onConnectError = () => setError('Sunucuya bağlanılamadı. Sunucu çalışıyor mu?');
-    const onRoomUpdate = (r) => setRoom(r);
+    const onRoomUpdate = (r) => {
+      setRoom(r);
+      if (r?.round) {
+        setRound(r.round);
+      }
+    };
     const onWordRound = (d) => { setRound({ type: 'word', ...d }); setResult(null); setSubmitted(false); setOppSubmitted(false); };
     const onWordResult = (d) => setResult({ type: 'word', ...d });
     const onNumberRound = (d) => { setRound({ type: 'number', ...d }); setResult(null); setSubmitted(false); setOppSubmitted(false); };
@@ -65,7 +75,7 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
       socket.off('opponentSubmitted', onOpponentSubmitted);
       socket.off('playerLeft', onPlayerLeft);
     };
-  }, [room?.code, playerId]);
+  }, []);
 
   // Lobiye dönünce eski tur/sonuç verisini temizle.
   useEffect(() => {
@@ -82,16 +92,34 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
   function createRoom() {
     setError('');
     getSocket().emit('createRoom', { name: name.trim() }, (res) => {
-      if (res?.ok) { setPlayerId(res.playerId); }
-      else setError(res?.error || 'Oda oluşturulamadı');
+      if (res?.ok) {
+        setPlayerId(res.playerId);
+        setRoom({
+          code: res.code,
+          phase: res.phase,
+          players: res.players,
+          settings: res.settings,
+        });
+      } else {
+        setError(res?.error || 'Oda oluşturulamadı');
+      }
     });
   }
 
   function joinRoom() {
     setError('');
     getSocket().emit('joinRoom', { code: joinCode.trim(), name: name.trim() }, (res) => {
-      if (res?.ok) { setPlayerId(res.playerId); }
-      else setError(res?.error || 'Odaya katılınamadı');
+      if (res?.ok) {
+        setPlayerId(res.playerId);
+        setRoom({
+          code: res.code,
+          phase: res.phase,
+          players: res.players,
+          settings: res.settings,
+        });
+      } else {
+        setError(res?.error || 'Odaya katılınamadı');
+      }
     });
   }
 

@@ -89,6 +89,17 @@ export function createRoomManager(io) {
       settings: room.settings,
       currentRound: room.currentRoundIndex || 1,
       totalRounds: room.settings?.totalRounds || 2,
+      round: room.round
+        ? {
+            type: room.round.type,
+            letters: room.round.letters,
+            numbers: room.round.numbers,
+            target: room.round.target,
+            endsAt: room.round.endsAt,
+            roundIndex: room.currentRoundIndex,
+            totalRounds: room.settings?.totalRounds || 2,
+          }
+        : null,
     });
   }
 
