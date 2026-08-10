@@ -28,17 +28,23 @@ export function useCountdown(seconds, active, onDone, key) {
 
 // Hedef zaman damgasına (endsAt) göre geri sayım — online mod için (sunucu senkronu).
 export function useDeadline(endsAt, onDone) {
+  const [bonusMs, setBonusMs] = useState(0);
+
   const [remaining, setRemaining] = useState(() =>
-    endsAt ? Math.max(0, Math.ceil((endsAt - Date.now()) / 1000)) : 0
+    endsAt ? Math.max(0, Math.ceil((endsAt + bonusMs - Date.now()) / 1000)) : 0
   );
   const onDoneRef = useRef(onDone);
   onDoneRef.current = onDone;
 
   useEffect(() => {
+    setBonusMs(0);
+  }, [endsAt]);
+
+  useEffect(() => {
     if (!endsAt) return;
     let done = false;
     const tick = () => {
-      const secs = Math.max(0, Math.ceil((endsAt - Date.now()) / 1000));
+      const secs = Math.max(0, Math.ceil((endsAt + bonusMs - Date.now()) / 1000));
       setRemaining(secs);
       if (secs <= 0 && !done) {
         done = true;
@@ -48,9 +54,9 @@ export function useDeadline(endsAt, onDone) {
     tick();
     const id = setInterval(tick, 250);
     return () => clearTimeout(id);
-  }, [endsAt]);
+  }, [endsAt, bonusMs]);
 
-  const addTime = (secs) => setRemaining((r) => r + secs);
+  const addTime = (secs) => setBonusMs((b) => b + secs * 1000);
 
   return [remaining, addTime];
 }
