@@ -361,48 +361,101 @@ export function createRoomManager(io) {
       roomUpdate(room);
     });
 
-    socket.on('updateSettings', ({ settings } = {}, cb) => {
-      const room = rooms.get(socket.data.roomCode);
-      if (!room || socket.data.playerId !== room.hostId) {
+    socket.on('rejoinRoom', ({ code, playerId } = {}, cb) => {
+      const roomCode = (code || '').toUpperCase().trim();
+      const room = rooms.get(roomCode);
+      if (!room) return cb?.({ ok: false, error: 'Oda bulunamadı' });
+      const player = room.players.get(playerId);
+      if (!player) return cb?.({ ok: false, error: 'Oyuncu bulunamadı' });
+
+      player.connected = true;
+      player.socketId = socket.id;
+      socket.data.playerId = playerId;
+      socket.data.roomCode = roomCode;
+      socket.join(roomCode);
+      roomUpdate(room);
+      cb?.({ ok: true, room });
+    });
+
+    socket.on('updateSettings', ({ settings, code, playerId } = {}, cb) => {
+      const roomCode = code || socket.data.roomCode;
+      const pId = playerId || socket.data.playerId;
+      const room = rooms.get(roomCode);
+      if (!room || pId !== room.hostId) {
         return cb?.({ ok: false, error: 'Yetkiniz yok' });
       }
       if (room.phase !== 'lobby') {
         return cb?.({ ok: false, error: 'Oyun başladıktan sonra ayarlar değiştirilemez' });
       }
 
+      socket.data.roomCode = roomCode;
+      socket.data.playerId = pId;
+      socket.join(roomCode);
+
       room.settings = sanitizeSettings({ ...room.settings, ...settings });
       roomUpdate(room);
       cb?.({ ok: true, settings: room.settings });
     });
 
-    socket.on('startGame', () => {
-      const room = rooms.get(socket.data.roomCode);
-      if (!room || socket.data.playerId !== room.hostId) return;
-      if (room.players.size < 2 || room.phase !== 'lobby') return;
+    socket.on('startGame', ({ code, playerId } = {}, cb) => {
+      const roomCode = code || socket.data.roomCode;
+      const pId = playerId || socket.data.playerId;
+      const room = rooms.get(roomCode);
+      if (!room) return cb?.({ ok: false, error: 'Oda bulunamadı' });
+      if (pId !== room.hostId) return cb?.({ ok: false, error: 'Sadece kurucu oyunu başlatabilir' });
+      if (room.players.size < 2) return cb?.({ ok: false, error: 'Oyunu başlatmak için en az 2 oyuncu gerekiyor' });
+      if (room.phase !== 'lobby') return cb?.({ ok: false, error: 'Oyun zaten başladı' });
+
+      socket.data.roomCode = roomCode;
+      socket.data.playerId = pId;
+      socket.join(roomCode);
+
       room.currentRoundIndex = 1;
       startWordRound(room);
+      cb?.({ ok: true });
     });
 
-    socket.on('submitWord', ({ word } = {}) => {
-      const room = rooms.get(socket.data.roomCode);
+    socket.on('submitWord', ({ word, code, playerId } = {}) => {
+      const roomCode = code || socket.data.roomCode;
+      const pId = playerId || socket.data.playerId;
+      const room = rooms.get(roomCode);
       if (!room || room.phase !== 'word') return;
-      room.round.answers.set(socket.data.playerId, String(word || ''));
+
+      socket.data.roomCode = roomCode;
+      socket.data.playerId = pId;
+      socket.join(roomCode);
+
+      room.round.answers.set(pId, String(word || ''));
       socket.to(room.code).emit('opponentSubmitted');
       checkAllAnswered(room);
     });
 
-    socket.on('submitExpression', ({ expr } = {}) => {
-      const room = rooms.get(socket.data.roomCode);
+    socket.on('submitExpression', ({ expr, code, playerId } = {}) => {
+      const roomCode = code || socket.data.roomCode;
+      const pId = playerId || socket.data.playerId;
+      const room = rooms.get(roomCode);
       if (!room || room.phase !== 'number') return;
-      room.round.answers.set(socket.data.playerId, String(expr || ''));
+
+      socket.data.roomCode = roomCode;
+      socket.data.playerId = pId;
+      socket.join(roomCode);
+
+      room.round.answers.set(pId, String(expr || ''));
       socket.to(room.code).emit('opponentSubmitted');
       checkAllAnswered(room);
     });
 
     // Bitince tekrar oyna: skorları sıfırla, lobiye dön (host tetikler).
-    socket.on('playAgain', () => {
-      const room = rooms.get(socket.data.roomCode);
-      if (!room || socket.data.playerId !== room.hostId || room.phase !== 'over') return;
+    socket.on('playAgain', ({ code, playerId } = {}) => {
+      const roomCode = code || socket.data.roomCode;
+      const pId = playerId || socket.data.playerId;
+      const room = rooms.get(roomCode);
+      if (!room || pId !== room.hostId || room.phase !== 'over') return;
+
+      socket.data.roomCode = roomCode;
+      socket.data.playerId = pId;
+      socket.join(roomCode);
+
       clearRoomTimers(room);
       for (const p of room.players.values()) p.score = 0;
       room.phase = 'lobby';

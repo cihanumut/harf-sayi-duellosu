@@ -25,7 +25,13 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
     const socket = getSocket();
     setConnected(socket.connected);
 
-    const onConnect = () => { setConnected(true); setError(''); };
+    const onConnect = () => {
+      setConnected(true);
+      setError('');
+      if (room?.code && playerId) {
+        getSocket().emit('rejoinRoom', { code: room.code, playerId });
+      }
+    };
     const onConnectError = () => setError('Sunucuya bağlanılamadı. Sunucu çalışıyor mu?');
     const onRoomUpdate = (r) => setRoom(r);
     const onWordRound = (d) => { setRound({ type: 'word', ...d }); setResult(null); setSubmitted(false); setOppSubmitted(false); };
@@ -59,7 +65,7 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
       socket.off('opponentSubmitted', onOpponentSubmitted);
       socket.off('playerLeft', onPlayerLeft);
     };
-  }, []);
+  }, [room?.code, playerId]);
 
   // Lobiye dönünce eski tur/sonuç verisini temizle.
   useEffect(() => {
@@ -90,17 +96,34 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
   }
 
   function updateRoomSettings(newSettings) {
-    getSocket().emit('updateSettings', { settings: newSettings }, (res) => {
+    getSocket().emit('updateSettings', { settings: newSettings, code: room?.code, playerId }, (res) => {
       if (!res?.ok) {
         setError(res?.error || 'Ayarlar güncellenemedi');
       }
     });
   }
 
-  const startGame = () => getSocket().emit('startGame');
-  const playAgain = () => { setOver(null); getSocket().emit('playAgain'); };
-  const submitWord = (word) => { setSubmitted(true); getSocket().emit('submitWord', { word }); };
-  const submitExpr = (expr) => { setSubmitted(true); getSocket().emit('submitExpression', { expr }); };
+  const startGame = () => {
+    setError('');
+    getSocket().emit('startGame', { code: room?.code, playerId }, (res) => {
+      if (res?.error) setError(res.error);
+    });
+  };
+
+  const playAgain = () => {
+    setOver(null);
+    getSocket().emit('playAgain', { code: room?.code, playerId });
+  };
+
+  const submitWord = (word) => {
+    setSubmitted(true);
+    getSocket().emit('submitWord', { word, code: room?.code, playerId });
+  };
+
+  const submitExpr = (expr) => {
+    setSubmitted(true);
+    getSocket().emit('submitExpression', { expr, code: room?.code, playerId });
+  };
 
   const me = room?.players?.find((p) => p.id === playerId);
   const isHost = !!me?.isHost;
