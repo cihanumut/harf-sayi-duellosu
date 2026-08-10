@@ -8,6 +8,8 @@ import MarketModal from './components/MarketModal.jsx';
 import { useCoins } from './hooks/useCoins.js';
 import { useJokers } from './hooks/useJokers.js';
 
+import { ErrorBoundary } from './components/ErrorBoundary.jsx';
+
 export default function App() {
   const [screen, setScreen] = useState('menu'); // menu | offlineSetup | offline | online
   const [config, setConfig] = useState(null);
@@ -52,23 +54,27 @@ export default function App() {
           />
         )}
         {screen === 'offline' && config && (
-          <OfflineGame
-            mode={config.mode}
-            names={config.names}
-            difficulty={config.difficulty}
-            onExit={toMenu}
-            onAwardCoins={handleAwardCoins}
-            jokers={jokers}
-            onConsumeJoker={consumeJoker}
-          />
+          <ErrorBoundary onReset={toMenu}>
+            <OfflineGame
+              mode={config.mode}
+              names={config.names}
+              difficulty={config.difficulty}
+              onExit={toMenu}
+              onAwardCoins={handleAwardCoins}
+              jokers={jokers}
+              onConsumeJoker={consumeJoker}
+            />
+          </ErrorBoundary>
         )}
         {screen === 'online' && (
-          <OnlineGame
-            onExit={toMenu}
-            onAwardCoins={handleAwardCoins}
-            jokers={jokers}
-            onConsumeJoker={consumeJoker}
-          />
+          <ErrorBoundary onReset={toMenu}>
+            <OnlineGame
+              onExit={toMenu}
+              onAwardCoins={handleAwardCoins}
+              jokers={jokers}
+              onConsumeJoker={consumeJoker}
+            />
+          </ErrorBoundary>
         )}
       </main>
 
