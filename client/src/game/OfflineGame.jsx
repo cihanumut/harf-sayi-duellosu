@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   canFormWord,
   trLower,
@@ -17,7 +17,7 @@ import NumberPlay from './NumberPlay.jsx';
 import { LetterTiles, NumberTiles, Panel, Scoreboard } from '../components/GameBits.jsx';
 
 // mode: 'cpu' | '2p'
-export default function OfflineGame({ mode, names, difficulty, onExit }) {
+export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCoins }) {
   const humans = mode === 'cpu' ? [0] : [0, 1];
   const [players, setPlayers] = useState([
     { name: names[0], score: 0 },
@@ -219,7 +219,7 @@ export default function OfflineGame({ mode, names, difficulty, onExit }) {
       )}
 
       {phase === 'gameOver' && (
-        <GameOver players={players} onExit={onExit} onReplay={replay} />
+        <GameOver players={players} onExit={onExit} onReplay={replay} onAwardCoins={onAwardCoins} />
       )}
     </div>
   );
@@ -257,14 +257,40 @@ function ResultRow({ name, main, sub, valid, points }) {
   );
 }
 
-function GameOver({ players, onExit, onReplay }) {
+function GameOver({ players, onExit, onReplay, onAwardCoins }) {
+  const [rewardClaimed, setRewardClaimed] = useState(false);
+  const [rewardCoins, setRewardCoins] = useState(0);
+
   const top = Math.max(...players.map((p) => p.score));
   const winners = players.filter((p) => p.score === top);
+  const isHumanWinner = winners.some((w) => w.name === players[0].name);
+  const isTie = winners.length > 1 && isHumanWinner;
+
+  useEffect(() => {
+    if (!rewardClaimed && onAwardCoins) {
+      let earned = 5;
+      if (isHumanWinner && !isTie) earned = 50;
+      else if (isTie) earned = 20;
+      
+      setRewardCoins(earned);
+      onAwardCoins(earned);
+      setRewardClaimed(true);
+    }
+  }, [rewardClaimed, isHumanWinner, isTie, onAwardCoins]);
+
   const msg = winners.length === 1 ? `${winners[0].name} kazandı! 🏆` : 'Berabere! 🤝';
   return (
     <Panel title="Oyun Bitti">
       <div className="stack stack--center">
         <h2 className="winner">{msg}</h2>
+        
+        {rewardCoins > 0 && (
+          <div className="coin-reward-banner">
+            <span className="coin-reward-banner__icon">🪙</span>
+            <span className="coin-reward-banner__text"> Tebrikler! <strong>+{rewardCoins} Coin</strong> kazandın!</span>
+          </div>
+        )}
+
         <Scoreboard players={players} />
         <div className="btn-row">
           <button className="btn btn--primary" onClick={onReplay}>Tekrar Oyna</button>

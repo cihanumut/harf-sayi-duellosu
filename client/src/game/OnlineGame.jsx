@@ -4,7 +4,7 @@ import WordPlay from './WordPlay.jsx';
 import NumberPlay from './NumberPlay.jsx';
 import { LetterTiles, NumberTiles, Panel, Scoreboard } from '../components/GameBits.jsx';
 
-export default function OnlineGame({ onExit }) {
+export default function OnlineGame({ onExit, onAwardCoins }) {
   const [name, setName] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [connected, setConnected] = useState(false);
@@ -283,21 +283,53 @@ export default function OnlineGame({ onExit }) {
       )}
 
       {room.phase === 'over' && over && (
-        <Panel title="Oyun Bitti">
-          <div className="stack stack--center">
-            <h2 className="winner">
-              {over.winner ? `${over.winner.name} kazandı! 🏆` : 'Berabere! 🤝'}
-            </h2>
-            <Scoreboard players={over.scores} />
-            <div className="btn-row">
-              {isHost && <button className="btn btn--primary" onClick={playAgain}>Tekrar Oyna</button>}
-              <button className="btn btn--ghost" onClick={leave}>Ayrıl</button>
-            </div>
-            {!isHost && <p className="hint">Kurucu yeni oyun başlatabilir.</p>}
-          </div>
-        </Panel>
+        <OnlineGameOver over={over} isHost={isHost} playAgain={playAgain} leave={leave} me={me} onAwardCoins={onAwardCoins} />
       )}
     </div>
+  );
+}
+
+function OnlineGameOver({ over, isHost, playAgain, leave, me, onAwardCoins }) {
+  const [rewardClaimed, setRewardClaimed] = useState(false);
+  const [rewardCoins, setRewardCoins] = useState(0);
+
+  const isWinner = over.winner && me && over.winner.id === me.id;
+  const isTie = !over.winner;
+
+  useEffect(() => {
+    if (!rewardClaimed && onAwardCoins) {
+      let earned = 10;
+      if (isWinner) earned = 50;
+      else if (isTie) earned = 25;
+      
+      setRewardCoins(earned);
+      onAwardCoins(earned);
+      setRewardClaimed(true);
+    }
+  }, [rewardClaimed, isWinner, isTie, onAwardCoins]);
+
+  return (
+    <Panel title="Oyun Bitti">
+      <div className="stack stack--center">
+        <h2 className="winner">
+          {over.winner ? `${over.winner.name} kazandı! 🏆` : 'Berabere! 🤝'}
+        </h2>
+
+        {rewardCoins > 0 && (
+          <div className="coin-reward-banner">
+            <span className="coin-reward-banner__icon">🪙</span>
+            <span className="coin-reward-banner__text"> Harika! <strong>+{rewardCoins} Coin</strong> kazandın!</span>
+          </div>
+        )}
+
+        <Scoreboard players={over.scores} />
+        <div className="btn-row">
+          {isHost && <button className="btn btn--primary" onClick={playAgain}>Tekrar Oyna</button>}
+          <button className="btn btn--ghost" onClick={leave}>Ayrıl</button>
+        </div>
+        {!isHost && <p className="hint">Kurucu yeni oyun başlatabilir.</p>}
+      </div>
+    </Panel>
   );
 }
 
