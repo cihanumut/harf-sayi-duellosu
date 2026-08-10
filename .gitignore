@@ -1,20 +1,16 @@
 node_modules/
 dist/
-dev-dist/
 shared/data/words.json
 *.log
 .env
-.env.production
 .DS_Store
 
-# Android / iOS / Capacitor
+# Android / Capacitor
 client/android/.gradle/
 client/android/build/
 client/android/app/build/
 client/android/capacitor-cordova-android-plugins/build/
 client/android/local.properties
-client/ios/App/Pods/
-client/ios/App/DerivedData/
 
 # İmzalama anahtarı ve şifreler — ASLA git'e girmesin, ama YEDEKLE!
 *.jks
