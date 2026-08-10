@@ -20,7 +20,7 @@ npm run wordlist   # Türkçe kelime listesini indirip shared/data/words.json ü
 ## Çalıştırma
 
 ```bash
-npm run dev        # client (http://localhost:5173) + server (http://localhost:3001) birlikte
+npm run dev        # client (http://localhost:5173) + server (https://harf-sayi-duellosu.onrender.com/) birlikte
 ```
 
 Sadece biri:

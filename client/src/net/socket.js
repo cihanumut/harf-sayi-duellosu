@@ -1,7 +1,7 @@
 import { io } from 'socket.io-client';
 
 // Sunucu adresi: geliştirmede localhost:3001, üretimde aynı origin.
-const URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:3001';
+const URL = import.meta.env.VITE_SERVER_URL || 'https://harf-sayi-duellosu.onrender.com/';
 
 let socket = null;
 
