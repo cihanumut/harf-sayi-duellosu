@@ -113,20 +113,25 @@ export default function OnlineGame({ onExit, onAwardCoins }) {
         <div className="game__top">
           <button className="btn btn--ghost" onClick={onExit}>← Menü</button>
           <span className={`conn ${connected ? 'conn--ok' : 'conn--bad'}`}>
-            {connected ? 'Bağlı' : 'Bağlanıyor…'}
+            {connected ? '🟢 Sunucu Hazır' : '🟡 Sunucu Uyanıyor…'}
           </span>
         </div>
-        <Panel title="Online Oyun">
+        <Panel title="Çevrimiçi Düello Lobisi">
           <div className="stack">
+            {!connected && (
+              <div className="notice notice--warning" style={{ fontSize: '0.88rem', padding: '10px 14px' }}>
+                ⏳ <strong>Canlı sunucu uykudan uyanıyor.</strong> İlk bağlantı ~20-30 saniye sürebilir, lütfen bekleyin…
+              </div>
+            )}
             <input
               className="text-input"
-              placeholder="Adın"
+              placeholder="Adınız"
               value={name}
               maxLength={20}
               onChange={(e) => setName(e.target.value)}
             />
             <button className="btn btn--primary" disabled={!connected} onClick={createRoom}>
-              Oda Kur
+              {connected ? 'Oda Kur' : 'Sunucu Bağlanıyor…'}
             </button>
             <div className="divider">veya</div>
             <div className="btn-row">
