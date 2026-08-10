@@ -3,6 +3,7 @@ services:
     name: bir-kelime-bir-islem-server
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npm run wordlist
     startCommand: npm --workspace server run start
     healthCheckPath: /health
+

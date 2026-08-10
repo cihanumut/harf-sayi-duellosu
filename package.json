@@ -13,7 +13,7 @@
     "dev": "concurrently -n server,client -c blue,green \"npm:dev:server\" \"npm:dev:client\"",
     "dev:client": "npm --workspace client run dev",
     "dev:server": "npm --workspace server run dev",
-    "build": "echo 'Server build complete'",
+    "build": "npm run wordlist",
     "build:client": "npm --workspace client run build",
     "test": "vitest run",
     "wordlist": "node scripts/build-wordlist.mjs"
