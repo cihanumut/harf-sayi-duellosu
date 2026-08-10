@@ -5,8 +5,8 @@ import {
   evaluateExpression,
   findLongestWords,
   solveNumbers,
-  scoreWord,
-  scoreNumbers,
+  calculateWordRoundScores,
+  calculateNumberRoundScores,
 } from '@bkbi/shared';
 import { WORDS, WORD_SET } from './dictionary.js';
 import { cpuWord, cpuNumbers } from './cpu.js';
@@ -66,14 +66,16 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
       newAnswers[1] = cpuAns;
     }
 
-    const res0 = scoreWord(newAnswers[0], letters, WORD_SET);
-    const res1 = scoreWord(newAnswers[1], letters, WORD_SET);
-    const deltas = [res0.points, res1.points];
-    addScores(deltas);
+    const scoredWords = calculateWordRoundScores([
+      { word: newAnswers[0], letters, wordSet: WORD_SET },
+      { word: newAnswers[1], letters, wordSet: WORD_SET },
+    ]);
+
+    addScores([scoredWords[0].points, scoredWords[1].points]);
 
     setWordResults([
-      { name: players[0].name, ...res0 },
-      { name: players[1].name, ...res1 },
+      { name: players[0].name, ...scoredWords[0] },
+      { name: players[1].name, ...scoredWords[1] },
     ]);
     setBestWords(findLongestWords(letters, WORDS));
     setPhase('wordResult');
@@ -103,20 +105,16 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
       newAnswers[1] = cpuAns;
     }
 
-    const res0 = scoreNumbers(newAnswers[0], numbers, target);
-    const res1 = scoreNumbers(newAnswers[1], numbers, target);
+    const scoredNumbers = calculateNumberRoundScores([
+      { expr: newAnswers[0], numbers, target },
+      { expr: newAnswers[1], numbers, target },
+    ]);
 
-    let maxPts = Math.max(res0.points, res1.points);
-    if (maxPts === 0) maxPts = -1;
-    const deltas = [
-      res0.points === maxPts ? res0.points : 0,
-      res1.points === maxPts ? res1.points : 0,
-    ];
-    addScores(deltas);
+    addScores([scoredNumbers[0].points, scoredNumbers[1].points]);
 
     setNumberResults([
-      { name: players[0].name, ...res0 },
-      { name: players[1].name, ...res1 },
+      { name: players[0].name, ...scoredNumbers[0] },
+      { name: players[1].name, ...scoredNumbers[1] },
     ]);
     setBestNumber(solveNumbers(numbers, target));
     setPhase('numberResult');

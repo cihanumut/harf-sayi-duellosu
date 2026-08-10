@@ -134,16 +134,25 @@ export function createRoomManager(io) {
     clearTimeout(room.round.timer);
     const { letters } = room.round;
 
-    const results = [];
-    for (const player of room.players.values()) {
-      const raw = room.round.answers.get(player.id) || '';
-      const word = raw.trim();
-      const valid =
-        word.length >= 2 && WORD_SET.has(word) && canFormWord(word, letters);
-      const points = scoreWord(word, { valid });
-      player.score += points;
-      results.push({ playerId: player.id, name: player.name, word, valid, points });
-    }
+    const playersList = Array.from(room.players.values());
+    const answersList = playersList.map((player) => ({
+      word: room.round.answers.get(player.id) || '',
+      letters,
+      wordSet: WORD_SET,
+    }));
+
+    const scored = calculateWordRoundScores(answersList);
+    const results = playersList.map((player, i) => {
+      const res = scored[i];
+      player.score += res.points;
+      return {
+        playerId: player.id,
+        name: player.name,
+        word: res.word,
+        valid: res.valid,
+        points: res.points,
+      };
+    });
 
     const best = findLongestWords(letters, WORDS, 3);
     room.phase = 'wordResult';
@@ -209,23 +218,26 @@ export function createRoomManager(io) {
     clearTimeout(room.round.timer);
     const { numbers, target } = room.round;
 
-    const results = [];
-    for (const player of room.players.values()) {
-      const expr = (room.round.answers.get(player.id) || '').trim();
-      let value = null;
-      let points = 0;
-      let valid = false;
-      if (expr) {
-        const evalRes = evaluateExpression(expr, numbers);
-        if (evalRes.ok) {
-          valid = true;
-          value = evalRes.value;
-          points = scoreNumbers(value, target);
-        }
-      }
-      player.score += points;
-      results.push({ playerId: player.id, name: player.name, expr, value, valid, points });
-    }
+    const playersList = Array.from(room.players.values());
+    const answersList = playersList.map((player) => ({
+      expr: room.round.answers.get(player.id) || '',
+      numbers,
+      target,
+    }));
+
+    const scored = calculateNumberRoundScores(answersList);
+    const results = playersList.map((player, i) => {
+      const res = scored[i];
+      player.score += res.points;
+      return {
+        playerId: player.id,
+        name: player.name,
+        expr: res.expr,
+        value: res.value,
+        valid: res.valid,
+        points: res.points,
+      };
+    });
 
     const best = solveNumbers(numbers, target);
     room.phase = 'numberResult';
