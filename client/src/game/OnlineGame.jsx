@@ -86,12 +86,16 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
     };
   }, []);
 
-  // Lobiye dönünce eski tur/sonuç verisini temizle.
+  // Lobiye veya yeni tura dönünce eski tur/sonuç ve gönderim durumunu temizle.
   useEffect(() => {
     if (room?.phase === 'lobby') { setRound(null); setResult(null); setOver(null); }
     if (room?.phase && room.phase !== 'over') setOver(null);
     if (room?.phase === 'lobby') setNotice('');
-  }, [room?.phase]);
+    if (room?.phase === 'word' || room?.phase === 'number') {
+      setSubmitted(false);
+      setOppSubmitted(false);
+    }
+  }, [room?.phase, round?.roundIndex]);
 
   function leave() {
     getSocket().emit('leaveRoom');

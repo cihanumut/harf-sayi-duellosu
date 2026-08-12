@@ -17,7 +17,11 @@ export default function NumberPlay({ numbers = [], target = 0, playerName, onSub
   const [deadlineRemaining, addDeadlineTime] = useDeadline(deadline, finish);
   const remaining = deadline ? deadlineRemaining : localRemaining;
 
-  function finish() {
+  function finish(e) {
+    if (e) {
+      e.preventDefault?.();
+      e.stopPropagation?.();
+    }
     if (done.current) return;
     done.current = true;
     onSubmit(exprString.trim());
@@ -68,9 +72,12 @@ export default function NumberPlay({ numbers = [], target = 0, playerName, onSub
   // Klavye kısayolları (Enter -> Onayla, Backspace -> Sil, operatörler)
   useEffect(() => {
     const handleKeyDown = (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+
       if (e.key === 'Enter') {
         e.preventDefault();
-        finishRef.current();
+        e.stopPropagation();
+        finishRef.current(e);
       } else if (e.key === 'Backspace') {
         e.preventDefault();
         setTokens((prev) => prev.slice(0, -1));
@@ -149,7 +156,7 @@ export default function NumberPlay({ numbers = [], target = 0, playerName, onSub
         <button className="chip chip--util" onClick={clear}>Temizle</button>
       </div>
 
-      <button className="btn btn--primary" onClick={finish}>Onayla</button>
+      <button className="btn btn--primary" disabled={done.current} onClick={finish}>Onayla</button>
     </div>
   );
 }

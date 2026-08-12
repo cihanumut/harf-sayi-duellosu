@@ -19,7 +19,11 @@ export default function WordPlay({ letters = [], playerName, onSubmit, deadline,
   const [deadlineRemaining, addDeadlineTime] = useDeadline(deadline, finish);
   const remaining = deadline ? deadlineRemaining : localRemaining;
 
-  function finish() {
+  function finish(e) {
+    if (e) {
+      e.preventDefault?.();
+      e.stopPropagation?.();
+    }
     if (done.current) return;
     done.current = true;
     onSubmit(word.trim());
@@ -95,10 +99,16 @@ export default function WordPlay({ letters = [], playerName, onSubmit, deadline,
         value={word}
         placeholder="kelimeni yaz…"
         onChange={(e) => setWord(e.target.value)}
-        onKeyDown={(e) => e.key === 'Enter' && finish()}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            e.stopPropagation();
+            finish(e);
+          }
+        }}
       />
       <p className={hintClass}>{hint}</p>
-      <button className="btn btn--primary" onClick={finish}>Onayla</button>
+      <button className="btn btn--primary" disabled={done.current} onClick={finish}>Onayla</button>
     </div>
   );
 }

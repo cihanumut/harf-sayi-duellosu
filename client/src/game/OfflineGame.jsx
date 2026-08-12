@@ -167,7 +167,7 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
       {phase === 'wordResult' && (
         <Panel
           title="Kelime Turu Sonucu"
-          footer={<button className="btn btn--primary" onClick={() => setPhase('numberSelect')}>Sayı Turuna Geç →</button>}
+          footer={<NextPhaseButton label="Sayı Turuna Geç →" onClick={() => setPhase('numberSelect')} />}
         >
           <LetterTiles letters={letters} />
           <div className="results">
@@ -209,7 +209,7 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
       {phase === 'numberResult' && (
         <Panel
           title="Sayı Turu Sonucu"
-          footer={<button className="btn btn--primary" onClick={() => setPhase('gameOver')}>Sonuçlar →</button>}
+          footer={<NextPhaseButton label="Sonuçlar →" onClick={() => setPhase('gameOver')} />}
         >
           <div className="target">Hedef: <strong>{target}</strong></div>
           <NumberTiles numbers={numbers} />
@@ -245,6 +245,40 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
     setPhase('wordSelect');
     startTurn(0);
   }
+}
+
+function NextPhaseButton({ onClick, label, delayMs = 1000 }) {
+  const [disabled, setDisabled] = useState(true);
+  const [remainingSecs, setRemainingSecs] = useState(Math.ceil(delayMs / 1000));
+
+  useEffect(() => {
+    setDisabled(true);
+    setRemainingSecs(Math.ceil(delayMs / 1000));
+
+    const interval = setInterval(() => {
+      setRemainingSecs((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          setDisabled(false);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [delayMs]);
+
+  return (
+    <button
+      className="btn btn--primary"
+      disabled={disabled}
+      onClick={onClick}
+      style={{ transition: 'all 0.2s ease', opacity: disabled ? 0.7 : 1 }}
+    >
+      {label} {disabled && remainingSecs > 0 ? `(${remainingSecs}s)` : ''}
+    </button>
+  );
 }
 
 function TurnGate({ name, onStart }) {
