@@ -19,15 +19,15 @@ export function cpuWord(letters, difficulty = 'normal') {
 // Sayı turu: hard tam çözer; normal/easy'de bazen bilerek daha uzağa "nişan alır".
 export function cpuNumbers(numbers, target, difficulty = 'normal') {
   const best = solveNumbers(numbers, target);
-  if (difficulty === 'hard') return best;
+  if (difficulty === 'hard') return best?.expr || '';
 
   // normal/easy: rastgele biraz sapmalı bir hedefe yönel, böylece oyuncunun şansı olur.
   const spread = difficulty === 'easy' ? 15 : 8;
   const missChance = difficulty === 'easy' ? 0.6 : 0.4;
-  if (Math.random() > missChance) return best; // yine de bazen tam vurur
+  if (Math.random() > missChance) return best?.expr || ''; // yine de bazen tam vurur
 
   const off = (1 + Math.floor(Math.random() * spread));
   const altTarget = target + (Math.random() < 0.5 ? -off : off);
   const alt = solveNumbers(numbers, altTarget);
-  return alt; // gerçek bir ifade; hedefe göre puanı düşük olabilir
+  return alt?.expr || ''; // gerçek bir ifade dizgesi
 }

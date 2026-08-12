@@ -31,7 +31,12 @@ export function evaluateWordResult(rawWord, letters, wordSet) {
 
 // Tekil Sayı Değerlendirmesi
 export function evaluateNumberResult(rawExpr, numbers, target) {
-  const expr = (rawExpr || '').trim();
+  const expr = typeof rawExpr === 'string'
+    ? rawExpr.trim()
+    : (rawExpr && typeof rawExpr === 'object' && typeof rawExpr.expr === 'string')
+    ? rawExpr.expr.trim()
+    : '';
+
   if (!expr) {
     return { expr: '', value: null, valid: false, points: 0, diff: Infinity };
   }

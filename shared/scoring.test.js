@@ -77,4 +77,10 @@ describe('calculateNumberRoundScores', () => {
     expect(res[1].valid).toBe(true);
     expect(res[1].points).toBe(0); // Player 1 was exact, so player 2 gets 0
   });
+
+  it('handles object expr gracefully without crashing', () => {
+    const res = evaluateNumberResult({ expr: '100 * 5 + 25 + 2' }, numbers, target);
+    expect(res.valid).toBe(true);
+    expect(res.value).toBe(527);
+  });
 });

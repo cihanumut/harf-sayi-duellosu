@@ -20,12 +20,22 @@ function letterCounts(letters) {
 
 // word, verilen harf dizisinden (her harf en fazla bulunduğu kadar) kurulabilir mi?
 export function canFormWord(word, letters) {
-  const chars = [...trLower(word)];
-  const pool = letterCounts(letters.map(trLower));
-  for (const ch of chars) {
-    const remaining = pool.get(ch);
-    if (!remaining) return false;
-    pool.set(ch, remaining - 1);
+  if (!word || !letters || letters.length === 0) return false;
+  const cleanWord = trLower(String(word).trim());
+  const maxLen = letters.length;
+  if (cleanWord.length < 2 || cleanWord.length > maxLen) return false;
+
+  const pool = {};
+  for (let i = 0; i < letters.length; i++) {
+    const ch = trLower(letters[i]);
+    pool[ch] = (pool[ch] || 0) + 1;
+  }
+
+  for (let i = 0; i < cleanWord.length; i++) {
+    const ch = cleanWord[i];
+    if (!pool[ch]) return false;
+    pool[ch]--;
   }
   return true;
 }
+

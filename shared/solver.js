@@ -91,12 +91,37 @@ export function evaluateExpression(expr, allowedNumbers) {
 // ---- Kelime turu çözücü ----
 // words: kelime dizisi (iterable). Harflerden kurulabilen en uzun kelimeleri döndürür.
 export function findLongestWords(letters, words, limit = 5) {
+  if (!letters || letters.length === 0 || !words) return [];
+
   const maxLen = letters.length;
+  const poolCounts = {};
+  for (let i = 0; i < letters.length; i++) {
+    const ch = trLower(letters[i]);
+    poolCounts[ch] = (poolCounts[ch] || 0) + 1;
+  }
+
   const found = [];
   for (const w of words) {
-    if (w.length < 2 || w.length > maxLen) continue;
-    if (canFormWord(w, letters)) found.push(w);
+    const len = w.length;
+    if (len < 2 || len > maxLen) continue;
+
+    let canForm = true;
+    const tempCounts = { ...poolCounts };
+    for (let i = 0; i < len; i++) {
+      const ch = w[i];
+      if (!tempCounts[ch]) {
+        canForm = false;
+        break;
+      }
+      tempCounts[ch]--;
+    }
+
+    if (canForm) {
+      found.push(w);
+    }
   }
+
   found.sort((a, b) => b.length - a.length || trLower(a).localeCompare(trLower(b), 'tr'));
   return found.slice(0, limit);
 }
+

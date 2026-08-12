@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { evaluateExpression, solveNumbers } from '@bkbi/shared';
 import { useCountdown, useDeadline } from './useCountdown.js';
 import { NumberTiles, Timer } from '../components/GameBits.jsx';
@@ -61,6 +61,29 @@ export default function NumberPlay({ numbers = [], target = 0, playerName, onSub
   const add = (t) => setTokens((prev) => [...prev, t]);
   const backspace = () => setTokens((prev) => prev.slice(0, -1));
   const clear = () => setTokens([]);
+
+  const finishRef = useRef(finish);
+  finishRef.current = finish;
+
+  // Klavye kısayolları (Enter -> Onayla, Backspace -> Sil, operatörler)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        finishRef.current();
+      } else if (e.key === 'Backspace') {
+        e.preventDefault();
+        setTokens((prev) => prev.slice(0, -1));
+      } else if (['+', '-', '*', '/', '(', ')'].includes(e.key)) {
+        let op = e.key;
+        if (op === '*') op = '×';
+        if (op === '/') op = '÷';
+        setTokens((prev) => [...prev, op]);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Sayı çipleri: her sayı örneğini ayrı buton yap, kullanılınca pasifleştir.
   const chipButtons = [];
