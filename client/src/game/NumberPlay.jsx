@@ -6,7 +6,7 @@ import JokerBar from '../components/JokerBar.jsx';
 
 const SECONDS = 45;
 
-export default function NumberPlay({ numbers = [], target = 0, playerName, onSubmit, deadline, jokers, onConsumeJoker }) {
+export default function NumberPlay({ numbers = [], target = 0, playerName, onSubmit, deadline, jokers, onConsumeJoker, onExtraTime }) {
   const [tokens, setTokens] = useState([]);
   const [jokerHintText, setJokerHintText] = useState(null);
   const done = useRef(false);
@@ -36,8 +36,12 @@ export default function NumberPlay({ numbers = [], target = 0, playerName, onSub
 
   const handleAddExtraTime = () => {
     if (onConsumeJoker && onConsumeJoker('extraTime')) {
-      if (deadline) addDeadlineTime(15);
-      else addLocalTime(15);
+      if (deadline) {
+        addDeadlineTime(15);
+        onExtraTime?.();
+      } else {
+        addLocalTime(15);
+      }
     }
   };
 

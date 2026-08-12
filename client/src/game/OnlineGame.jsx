@@ -51,6 +51,13 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
     const onGameOver = (d) => setOver(d);
     const onOpponentSubmitted = () => setOppSubmitted(true);
     const onPlayerLeft = () => setNotice('Rakip ayrıldı. Lobiye dönülüyor…');
+    const onExtraTimeAdded = ({ endsAt, addedBy }) => {
+      setRound((prev) => (prev ? { ...prev, endsAt } : null));
+      if (addedBy) {
+        setNotice(`⏱️ ${addedBy} ek süre jokeri kullandı (+15sn)!`);
+        setTimeout(() => setNotice(''), 4000);
+      }
+    };
 
     socket.on('connect', onConnect);
     socket.on('connect_error', onConnectError);
@@ -62,6 +69,7 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
     socket.on('gameOver', onGameOver);
     socket.on('opponentSubmitted', onOpponentSubmitted);
     socket.on('playerLeft', onPlayerLeft);
+    socket.on('extraTimeAdded', onExtraTimeAdded);
 
     return () => {
       socket.off('connect', onConnect);
@@ -74,6 +82,7 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
       socket.off('gameOver', onGameOver);
       socket.off('opponentSubmitted', onOpponentSubmitted);
       socket.off('playerLeft', onPlayerLeft);
+      socket.off('extraTimeAdded', onExtraTimeAdded);
     };
   }, []);
 
@@ -151,6 +160,10 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
   const submitExpr = (expr) => {
     setSubmitted(true);
     getSocket().emit('submitExpression', { expr, code: room?.code, playerId });
+  };
+
+  const handleExtraTime = () => {
+    getSocket().emit('addExtraTime', { code: room?.code, playerId });
   };
 
   const me = room?.players?.find((p) => p.id === playerId);
@@ -280,13 +293,14 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
           <Panel title={`${round.roundIndex || room.currentRound || 1}/${round.totalRounds || room.totalRounds || 2}. Tur — Kelime`}>
             {!submitted ? (
               <WordPlay
-                key={round.endsAt}
+                key={`word-${round.roundIndex || room.currentRound || 1}`}
                 letters={round.letters || []}
                 playerName={me?.name || 'Sen'}
                 deadline={round.endsAt}
                 onSubmit={submitWord}
                 jokers={jokers}
                 onConsumeJoker={onConsumeJoker}
+                onExtraTime={handleExtraTime}
               />
             ) : (
               <Waiting oppSubmitted={oppSubmitted} />
@@ -307,7 +321,7 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
           <Panel title={`${round.roundIndex || room.currentRound || 2}/${round.totalRounds || room.totalRounds || 2}. Tur — Sayı`}>
             {!submitted ? (
               <NumberPlay
-                key={round.endsAt}
+                key={`number-${round.roundIndex || room.currentRound || 2}`}
                 numbers={round.numbers || []}
                 target={round.target || 0}
                 playerName={me?.name || 'Sen'}
@@ -315,6 +329,7 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
                 onSubmit={submitExpr}
                 jokers={jokers}
                 onConsumeJoker={onConsumeJoker}
+                onExtraTime={handleExtraTime}
               />
             ) : (
               <Waiting oppSubmitted={oppSubmitted} />

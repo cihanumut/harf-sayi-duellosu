@@ -456,6 +456,44 @@ export function createRoomManager(io) {
       checkAllAnswered(room);
     });
 
+    socket.on('addExtraTime', ({ code, playerId } = {}, cb) => {
+      const roomCode = code || socket.data.roomCode;
+      const pId = playerId || socket.data.playerId;
+      const room = rooms.get(roomCode);
+      if (!room || !room.round) return cb?.({ ok: false, error: 'Aktif tur bulunamadı' });
+      if (room.phase !== 'word' && room.phase !== 'number') {
+        return cb?.({ ok: false, error: 'Ek süre sadece oyun turunda kullanılabilir' });
+      }
+
+      const player = room.players.get(pId);
+      if (!player) return cb?.({ ok: false, error: 'Oyuncu bulunamadı' });
+
+      const count = room.round.extraTimeCount || 0;
+      if (count >= 3) {
+        return cb?.({ ok: false, error: 'Bu turda maksimum ek süre sınırına ulaşıldı' });
+      }
+
+      room.round.extraTimeCount = count + 1;
+      room.round.endsAt += 15000;
+
+      clearTimeout(room.round.timer);
+      const remainingMs = Math.max(0, room.round.endsAt - Date.now());
+
+      if (room.phase === 'word') {
+        room.round.timer = setTimeout(() => finishWordRound(room), remainingMs + 500);
+      } else if (room.phase === 'number') {
+        room.round.timer = setTimeout(() => finishNumberRound(room), remainingMs + 500);
+      }
+
+      emitRoom(room, 'extraTimeAdded', {
+        endsAt: room.round.endsAt,
+        addedBy: player.name,
+      });
+      roomUpdate(room);
+
+      cb?.({ ok: true, endsAt: room.round.endsAt });
+    });
+
     // Bitince tekrar oyna: skorları sıfırla, lobiye dön (host tetikler).
     socket.on('playAgain', ({ code, playerId } = {}) => {
       const roomCode = code || socket.data.roomCode;

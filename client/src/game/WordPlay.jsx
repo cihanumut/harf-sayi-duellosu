@@ -7,7 +7,7 @@ import JokerBar from '../components/JokerBar.jsx';
 
 const SECONDS = 30;
 
-export default function WordPlay({ letters = [], playerName, onSubmit, deadline, jokers, onConsumeJoker }) {
+export default function WordPlay({ letters = [], playerName, onSubmit, deadline, jokers, onConsumeJoker, onExtraTime }) {
   const [word, setWord] = useState('');
   const [jokerHintText, setJokerHintText] = useState(null);
   const done = useRef(false);
@@ -40,8 +40,12 @@ export default function WordPlay({ letters = [], playerName, onSubmit, deadline,
 
   const handleAddExtraTime = () => {
     if (onConsumeJoker && onConsumeJoker('extraTime')) {
-      if (deadline) addDeadlineTime(15);
-      else addLocalTime(15);
+      if (deadline) {
+        addDeadlineTime(15);
+        onExtraTime?.();
+      } else {
+        addLocalTime(15);
+      }
     }
   };
 
