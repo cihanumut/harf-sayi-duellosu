@@ -1,6 +1,6 @@
 import { Panel } from '../components/GameBits.jsx';
 
-export default function MainMenu({ onOffline, onOnline, onOpenMarket, coins }) {
+export default function MainMenu({ onOffline, onOnline, onOpenMarket, onOpenHowToPlay, coins }) {
   return (
     <div className="menu">
       <div className="menu__hero">
@@ -43,6 +43,15 @@ export default function MainMenu({ onOffline, onOnline, onOpenMarket, coins }) {
               <span className="mode-card__desc">İpucu, ek süre ve işlem yardımcısı satın al</span>
             </div>
             <div className="mode-card__badge mode-card__badge--gold">Mağaza</div>
+          </button>
+
+          <button className="mode-card mode-card--info" onClick={onOpenHowToPlay}>
+            <div className="mode-card__icon">📖</div>
+            <div className="mode-card__info">
+              <span className="mode-card__title">Nasıl Oynanır &amp; Puanlama</span>
+              <span className="mode-card__desc">Oyun kurallarını, tur mantığını ve puan tablosunu öğren</span>
+            </div>
+            <div className="mode-card__badge">Rehber</div>
           </button>
         </div>
       </Panel>

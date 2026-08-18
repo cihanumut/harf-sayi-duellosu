@@ -1215,9 +1215,240 @@ body {
   .modal-card { padding: 20px; }
   .big-code { font-size: 2.2rem; letter-spacing: 8px; }
   .header-bar__market-label { display: none; }
+  .header-bar__btn-label { display: none; }
   .market-item { flex-direction: column; align-items: stretch; text-align: center; }
   .market-item__icon { margin: 0 auto; }
 }
+
+/* ---- Header Bar Button ---- */
+.header-bar__btn {
+  font: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(109, 92, 255, 0.15);
+  border: 1px solid rgba(123, 108, 255, 0.35);
+  color: #dbe0fe;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.header-bar__btn:hover {
+  background: rgba(109, 92, 255, 0.3);
+  border-color: rgba(123, 108, 255, 0.6);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* Mode card info variant */
+.mode-card--info {
+  background: linear-gradient(135deg, rgba(30, 41, 89, 0.85) 0%, rgba(15, 23, 56, 0.95) 100%);
+  border-color: rgba(56, 189, 248, 0.35);
+}
+
+.mode-card--info:hover {
+  border-color: #38bdf8;
+  box-shadow: 0 10px 25px rgba(56, 189, 248, 0.2);
+}
+
+/* ---- How To Play Modal Styles ---- */
+.how-to-play-modal {
+  max-width: 620px;
+}
+
+.how-to-play-modal__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+
+.how-to-play-modal__title-group {
+  flex: 1;
+}
+
+.how-to-play-modal__title {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: var(--gold);
+}
+
+.how-to-play-modal__sub {
+  margin: 4px 0 0;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+.btn-close {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--muted);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  font-size: 1.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-close:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+
+.how-to-play-tabs {
+  display: flex;
+  gap: 6px;
+  background: rgba(12, 16, 38, 0.7);
+  padding: 5px;
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 20px;
+  overflow-x: auto;
+}
+
+.how-to-play-tab {
+  flex: 1;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.how-to-play-tab:hover {
+  color: #fff;
+}
+
+.how-to-play-tab--active {
+  background: linear-gradient(135deg, #6d5cff 0%, #4f39f6 100%);
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(109, 92, 255, 0.35);
+}
+
+.how-to-play-content {
+  margin-bottom: 24px;
+}
+
+.guide-card {
+  background: rgba(15, 21, 50, 0.6);
+  border: 1px solid rgba(123, 108, 255, 0.2);
+  border-radius: 18px;
+  padding: 20px;
+  line-height: 1.6;
+}
+
+.guide-card h3 {
+  margin: 0 0 12px;
+  font-size: 1.15rem;
+  color: #fff;
+}
+
+.guide-list {
+  margin: 12px 0 0;
+  padding-left: 20px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 0.92rem;
+  color: #dbe0fe;
+}
+
+.guide-list li strong {
+  color: var(--gold);
+}
+
+.scoring-box {
+  background: rgba(10, 14, 34, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 14px;
+}
+
+.scoring-box h4 {
+  margin: 0 0 8px;
+  font-size: 0.98rem;
+  color: var(--accent);
+}
+
+.scoring-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 0.88rem;
+}
+
+.scoring-table th, .scoring-table td {
+  padding: 8px 12px;
+  text-align: left;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.scoring-table th {
+  color: var(--muted);
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.badge-pts {
+  color: #34d399;
+  background: rgba(52, 211, 153, 0.15);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.joker-item-guide {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: rgba(10, 14, 34, 0.7);
+  border: 1px solid rgba(255, 203, 71, 0.2);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-top: 10px;
+}
+
+.joker-item-guide__icon {
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.joker-item-guide__info strong {
+  display: block;
+  font-size: 0.95rem;
+  color: var(--gold);
+  margin-bottom: 2px;
+}
+
+.joker-item-guide__info p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #cbd5e1;
+}
+
+.how-to-play-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
 
 
 

@@ -5,6 +5,7 @@ import OfflineGame from './game/OfflineGame.jsx';
 import OnlineGame from './game/OnlineGame.jsx';
 import HeaderBar from './components/HeaderBar.jsx';
 import MarketModal from './components/MarketModal.jsx';
+import HowToPlayModal from './components/HowToPlayModal.jsx';
 import { useCoins } from './hooks/useCoins.js';
 import { useJokers } from './hooks/useJokers.js';
 
@@ -14,7 +15,8 @@ export default function App() {
   const [screen, setScreen] = useState('menu'); // menu | offlineSetup | offline | online
   const [config, setConfig] = useState(null);
   const [showMarket, setShowMarket] = useState(false);
-  
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
+
   const { coins, addCoins, spendCoins } = useCoins();
   const { jokers, buyJoker, consumeJoker } = useJokers();
   const [lastReward, setLastReward] = useState(0);
@@ -36,6 +38,7 @@ export default function App() {
         coins={coins}
         lastReward={lastReward}
         onOpenMarket={() => setShowMarket(true)}
+        onOpenHowToPlay={() => setShowHowToPlay(true)}
       />
 
       <main className="app-content">
@@ -45,6 +48,7 @@ export default function App() {
             onOffline={() => setScreen('offlineSetup')}
             onOnline={() => setScreen('online')}
             onOpenMarket={() => setShowMarket(true)}
+            onOpenHowToPlay={() => setShowHowToPlay(true)}
           />
         )}
         {screen === 'offlineSetup' && (
@@ -85,6 +89,10 @@ export default function App() {
           onBuy={handleBuyJoker}
           onClose={() => setShowMarket(false)}
         />
+      )}
+
+      {showHowToPlay && (
+        <HowToPlayModal onClose={() => setShowHowToPlay(false)} />
       )}
     </div>
   );

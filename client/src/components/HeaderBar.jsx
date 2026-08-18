@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-export default function HeaderBar({ coins, lastReward, onOpenMarket }) {
+export default function HeaderBar({ coins, lastReward, onOpenMarket, onOpenHowToPlay }) {
   const [pop, setPop] = useState(false);
 
   useEffect(() => {
@@ -19,6 +19,12 @@ export default function HeaderBar({ coins, lastReward, onOpenMarket }) {
       </div>
 
       <div className="header-bar__actions">
+        {onOpenHowToPlay && (
+          <button className="header-bar__btn" onClick={onOpenHowToPlay} title="Nasıl Oynanır & Puanlama">
+            📖 <span className="header-bar__btn-label">Kurallar</span>
+          </button>
+        )}
+
         {onOpenMarket && (
           <button className="header-bar__market-btn" onClick={onOpenMarket} title="Joker Mağazası">
             🛒 <span className="header-bar__market-label">Mağaza</span>
