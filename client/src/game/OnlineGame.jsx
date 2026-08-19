@@ -41,7 +41,10 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
     const onRoomUpdate = (r) => {
       setRoom(r);
       if (r?.round) {
-        setRound(r.round);
+        setRound((prev) => {
+          if (!prev) return r.round;
+          return { ...r.round, endsAt: prev.endsAt };
+        });
       }
     };
     const onWordRound = (d) => { setRound({ type: 'word', ...d }); setResult(null); setSubmitted(false); setOppSubmitted(false); };
@@ -51,8 +54,10 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
     const onGameOver = (d) => setOver(d);
     const onOpponentSubmitted = () => setOppSubmitted(true);
     const onPlayerLeft = () => setNotice('Rakip ayrıldı. Lobiye dönülüyor…');
-    const onExtraTimeAdded = ({ endsAt, addedBy }) => {
-      setRound((prev) => (prev ? { ...prev, endsAt } : null));
+    const onExtraTimeAdded = ({ endsAt, addedBy, playerId: targetPlayerId }) => {
+      if (targetPlayerId === playerIdRef.current) {
+        setRound((prev) => (prev ? { ...prev, endsAt } : null));
+      }
       if (addedBy) {
         setNotice(`⏱️ ${addedBy} ek süre jokeri kullandı (+15sn)!`);
         setTimeout(() => setNotice(''), 4000);

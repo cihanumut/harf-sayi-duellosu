@@ -468,16 +468,30 @@ export function createRoomManager(io) {
       const player = room.players.get(pId);
       if (!player) return cb?.({ ok: false, error: 'Oyuncu bulunamadı' });
 
-      const count = room.round.extraTimeCount || 0;
+      if (!room.round.playerExtraTimeCount) room.round.playerExtraTimeCount = new Map();
+      const count = room.round.playerExtraTimeCount.get(pId) || 0;
       if (count >= 3) {
         return cb?.({ ok: false, error: 'Bu turda maksimum ek süre sınırına ulaşıldı' });
       }
 
-      room.round.extraTimeCount = count + 1;
-      room.round.endsAt += 15000;
+      room.round.playerExtraTimeCount.set(pId, count + 1);
+
+      if (!room.round.playerDeadlines) {
+        room.round.playerDeadlines = new Map();
+        for (const id of room.players.keys()) {
+          room.round.playerDeadlines.set(id, room.round.endsAt);
+        }
+      }
+
+      const currentPDeadline = room.round.playerDeadlines.get(pId) || room.round.endsAt;
+      const newPDeadline = Math.max(currentPDeadline, Date.now()) + 15000;
+      room.round.playerDeadlines.set(pId, newPDeadline);
+
+      const maxDeadline = Math.max(...room.round.playerDeadlines.values());
+      room.round.endsAt = maxDeadline;
 
       clearTimeout(room.round.timer);
-      const remainingMs = Math.max(0, room.round.endsAt - Date.now());
+      const remainingMs = Math.max(0, maxDeadline - Date.now());
 
       if (room.phase === 'word') {
         room.round.timer = setTimeout(() => finishWordRound(room), remainingMs + 500);
@@ -486,12 +500,12 @@ export function createRoomManager(io) {
       }
 
       emitRoom(room, 'extraTimeAdded', {
-        endsAt: room.round.endsAt,
+        endsAt: newPDeadline,
         addedBy: player.name,
+        playerId: pId,
       });
-      roomUpdate(room);
 
-      cb?.({ ok: true, endsAt: room.round.endsAt });
+      cb?.({ ok: true, endsAt: newPDeadline });
     });
 
     // Bitince tekrar oyna: skorları sıfırla, lobiye dön (host tetikler).
