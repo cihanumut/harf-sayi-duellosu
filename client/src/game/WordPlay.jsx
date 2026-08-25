@@ -98,6 +98,11 @@ export default function WordPlay({ letters = [], playerName, onSubmit, deadline,
         autoFocus
         value={word}
         placeholder="kelimeni yaz…"
+        onFocus={(e) => {
+          setTimeout(() => {
+            e.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }, 250);
+        }}
         onChange={(e) => setWord(e.target.value)}
         onKeyDown={(e) => {
           if (e.key === 'Enter') {
