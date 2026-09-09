@@ -11,7 +11,7 @@
     "cap:open": "cap open android",
     "cap:sync:ios": "npm run build && cap sync ios",
     "cap:open:ios": "cap open ios",
-    "build:aab": "npm run build && cap sync android && cd android && gradlew bundleRelease"
+    "build:aab": "npm run build && cap sync android && cd android && gradlew.bat bundleRelease"
   },
   "dependencies": {
     "@bkbi/shared": "*",

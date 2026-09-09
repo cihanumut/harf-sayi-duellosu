@@ -12,6 +12,7 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
   const [notice, setNotice] = useState('');
 
   const [playerId, setPlayerId] = useState(null);
+  const [rejoinToken, setRejoinToken] = useState(null);
   const [room, setRoom] = useState(null); // {code, phase, players, settings, currentRound, totalRounds}
   const [round, setRound] = useState(null); // {type, letters|numbers, target?, endsAt, roundIndex, totalRounds}
   const [result, setResult] = useState(null);
@@ -25,6 +26,8 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
   roomRef.current = room;
   const playerIdRef = useRef(playerId);
   playerIdRef.current = playerId;
+  const rejoinTokenRef = useRef(rejoinToken);
+  rejoinTokenRef.current = rejoinToken;
 
   useEffect(() => {
     const socket = getSocket();
@@ -33,8 +36,12 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
     const onConnect = () => {
       setConnected(true);
       setError('');
-      if (roomRef.current?.code && playerIdRef.current) {
-        socket.emit('rejoinRoom', { code: roomRef.current.code, playerId: playerIdRef.current });
+      if (roomRef.current?.code && playerIdRef.current && rejoinTokenRef.current) {
+        socket.emit('rejoinRoom', {
+          code: roomRef.current.code,
+          playerId: playerIdRef.current,
+          rejoinToken: rejoinTokenRef.current,
+        });
       }
     };
     const onConnectError = () => setError('Sunucuya bağlanılamadı. Sunucu çalışıyor mu?');
@@ -112,6 +119,7 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
     getSocket().emit('createRoom', { name: name.trim() }, (res) => {
       if (res?.ok) {
         setPlayerId(res.playerId);
+        setRejoinToken(res.rejoinToken);
         setRoom({
           code: res.code,
           phase: res.phase,
@@ -129,6 +137,7 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
     getSocket().emit('joinRoom', { code: joinCode.trim(), name: name.trim() }, (res) => {
       if (res?.ok) {
         setPlayerId(res.playerId);
+        setRejoinToken(res.rejoinToken);
         setRoom({
           code: res.code,
           phase: res.phase,

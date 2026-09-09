@@ -64,6 +64,9 @@ export function solveNumbers(nums, target) {
 // Bir kullanıcı ifadesini güvenli biçimde değerlendirir ve kuralları kontrol eder.
 // Sadece verilen sayılar (birer kez) ve + - × * ÷ / ( ) izinlidir.
 export function evaluateExpression(expr, allowedNumbers) {
+  if (typeof expr !== 'string' || expr.length > 200) {
+    return { ok: false, error: 'Geçersiz ifade' };
+  }
   const normalized = expr.replace(/×/g, '*').replace(/÷/g, '/').replace(/\s+/g, '');
   if (!/^[0-9+\-*/()]+$/.test(normalized)) {
     return { ok: false, error: 'Geçersiz karakter' };
