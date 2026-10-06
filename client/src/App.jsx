@@ -63,6 +63,8 @@ export default function App() {
               mode={config.mode}
               names={config.names}
               difficulty={config.difficulty}
+              roundMode={config.roundMode}
+              totalRounds={config.totalRounds}
               onExit={toMenu}
               onAwardCoins={handleAwardCoins}
               jokers={jokers}

@@ -1,16 +1,28 @@
 import { useState } from 'react';
 import { Panel } from '../components/GameBits.jsx';
 
+const MIXED_ROUND_OPTIONS = [2, 4, 6, 8, 10];
+const SINGLE_ROUND_OPTIONS = [1, 2, 3, 4, 5];
+
 export default function OfflineSetup({ onStart, onBack }) {
   const [mode, setMode] = useState('cpu');
   const [difficulty, setDifficulty] = useState('normal');
+  const [roundMode, setRoundMode] = useState('mixed');
+  const [totalRounds, setTotalRounds] = useState(2);
   const [p1, setP1] = useState('');
   const [p2, setP2] = useState('');
+
+  const roundOptions = roundMode === 'mixed' ? MIXED_ROUND_OPTIONS : SINGLE_ROUND_OPTIONS;
+
+  function selectRoundMode(m) {
+    setRoundMode(m);
+    setTotalRounds(m === 'mixed' ? 2 : 1);
+  }
 
   function start() {
     const name1 = p1.trim() || 'Oyuncu 1';
     const name2 = mode === 'cpu' ? 'Bilgisayar' : (p2.trim() || 'Oyuncu 2');
-    onStart({ mode, difficulty, names: [name1, name2] });
+    onStart({ mode, difficulty, roundMode, totalRounds, names: [name1, name2] });
   }
 
   return (
@@ -43,6 +55,32 @@ export default function OfflineSetup({ onStart, onBack }) {
               </div>
             </>
           )}
+
+          <label className="field-label">Oyun Türü</label>
+          <div className="btn-row">
+            <button className={`btn ${roundMode === 'mixed' ? 'btn--primary' : ''}`} onClick={() => selectRoundMode('mixed')}>
+              Standart (Kelime + Sayı)
+            </button>
+            <button className={`btn ${roundMode === 'word' ? 'btn--primary' : ''}`} onClick={() => selectRoundMode('word')}>
+              Sadece Kelime
+            </button>
+            <button className={`btn ${roundMode === 'number' ? 'btn--primary' : ''}`} onClick={() => selectRoundMode('number')}>
+              Sadece Sayı
+            </button>
+          </div>
+
+          <label className="field-label">Raunt Sayısı</label>
+          <div className="btn-row">
+            {roundOptions.map((count) => (
+              <button
+                key={count}
+                className={`btn ${totalRounds === count ? 'btn--primary' : ''}`}
+                onClick={() => setTotalRounds(count)}
+              >
+                {roundMode === 'mixed' ? `${count} Tur (${count / 2}K + ${count / 2}S)` : `${count} Tur`}
+              </button>
+            ))}
+          </div>
 
           <label className="field-label">İsimler</label>
           <input className="text-input" placeholder="Oyuncu 1" value={p1} maxLength={20} onChange={(e) => setP1(e.target.value)} />

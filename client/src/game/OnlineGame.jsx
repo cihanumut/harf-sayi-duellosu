@@ -264,6 +264,11 @@ export default function OnlineGame({ onExit, onAwardCoins, jokers, onConsumeJoke
                 <span className="setting-badge">
                   🎲 Büyük Sayı: {room.settings?.bigCountMode === 'random' ? 'Rastgele (1-3)' : `${room.settings?.bigCountMode} Adet`}
                 </span>
+                <span className="setting-badge">
+                  {room.settings?.roundMode === 'word' && '📝 Sadece Kelime'}
+                  {room.settings?.roundMode === 'number' && '🔢 Sadece Sayı'}
+                  {(!room.settings?.roundMode || room.settings?.roundMode === 'mixed') && '🔀 Kelime + Sayı'}
+                </span>
               </div>
               {isHost && (
                 <button className="btn btn--ghost" style={{ marginTop: '4px', fontSize: '0.9rem' }} onClick={() => setShowSettings(true)}>
@@ -469,9 +474,10 @@ function RoomSettingsModal({ settings, onSave, onClose }) {
   const [maxPlayers, setMaxPlayers] = useState(settings?.maxPlayers || 2);
   const [totalRounds, setTotalRounds] = useState(settings?.totalRounds || 2);
   const [bigCountMode, setBigCountMode] = useState(settings?.bigCountMode || 'random');
+  const [roundMode, setRoundMode] = useState(settings?.roundMode || 'mixed');
 
   function handleSave() {
-    onSave({ wordTimeMs, numberTimeMs, maxPlayers, totalRounds, bigCountMode });
+    onSave({ wordTimeMs, numberTimeMs, maxPlayers, totalRounds, bigCountMode, roundMode });
   }
 
   return (
@@ -525,6 +531,25 @@ function RoomSettingsModal({ settings, onSave, onClose }) {
           </div>
 
           <div className="settings-group-card">
+            <label className="field-label">🎮 Oyun Türü</label>
+            <div className="pill-group">
+              {[
+                { val: 'mixed', label: '🔀 Kelime + Sayı' },
+                { val: 'word', label: '📝 Sadece Kelime' },
+                { val: 'number', label: '🔢 Sadece Sayı' },
+              ].map((opt) => (
+                <button
+                  key={opt.val}
+                  className={`pill-btn ${roundMode === opt.val ? 'pill-btn--active' : ''}`}
+                  onClick={() => setRoundMode(opt.val)}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="settings-group-card">
             <label className="field-label">🔄 Toplam Tur Sayısı</label>
             <div className="pill-group">
               {[2, 4, 6].map((count) => (
@@ -533,7 +558,7 @@ function RoomSettingsModal({ settings, onSave, onClose }) {
                   className={`pill-btn ${totalRounds === count ? 'pill-btn--active' : ''}`}
                   onClick={() => setTotalRounds(count)}
                 >
-                  {count} Tur ({count / 2}K + {count / 2}S)
+                  {roundMode === 'mixed' ? `${count} Tur (${count / 2}K + ${count / 2}S)` : `${count} Tur`}
                 </button>
               ))}
             </div>

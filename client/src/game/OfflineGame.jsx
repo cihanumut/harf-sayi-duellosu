@@ -17,13 +17,23 @@ import NumberPlay from './NumberPlay.jsx';
 import { LetterTiles, NumberTiles, Panel, Scoreboard } from '../components/GameBits.jsx';
 
 // mode: 'cpu' | '2p'
-export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCoins, jokers, onConsumeJoker }) {
+// roundMode: 'mixed' (standart, kelime/sayı sırayla) | 'word' (sadece kelime) | 'number' (sadece sayı)
+// totalRounds: toplam raunt sayısı (mixed modda kelime+sayı turları dahil)
+function roundTypeAt(roundMode, idx) {
+  if (roundMode === 'word') return 'word';
+  if (roundMode === 'number') return 'number';
+  return idx % 2 === 1 ? 'word' : 'number';
+}
+
+export default function OfflineGame({ mode, names, difficulty, roundMode = 'mixed', totalRounds = 2, onExit, onAwardCoins, jokers, onConsumeJoker }) {
   const humans = mode === 'cpu' ? [0] : [0, 1];
   const [players, setPlayers] = useState([
     { name: names[0], score: 0 },
     { name: names[1], score: 0 },
   ]);
-  const [phase, setPhase] = useState('wordSelect');
+  const [roundIndex, setRoundIndex] = useState(1);
+  const initialPhase = roundTypeAt(roundMode, 1) === 'number' ? 'numberSelect' : 'wordSelect';
+  const [phase, setPhase] = useState(initialPhase);
   const [letters, setLetters] = useState([]);
   const [numbers, setNumbers] = useState([]);
   const [target, setTarget] = useState(0);
@@ -129,9 +139,21 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
     setPhase('numberResult');
   }
 
+  function advanceRound() {
+    if (roundIndex < totalRounds) {
+      const next = roundIndex + 1;
+      setRoundIndex(next);
+      setPhase(roundTypeAt(roundMode, next) === 'number' ? 'numberSelect' : 'wordSelect');
+    } else {
+      setPhase('gameOver');
+    }
+  }
+
   // ---- Render ----
   const chooserName = players[0].name; // kelime turunu 1. oyuncu seçer
   const numberChooser = mode === '2p' ? players[1].name : players[0].name;
+  const wordTitle = totalRounds > 1 ? `${roundIndex}/${totalRounds}. Tur — Kelime` : 'Kelime Turu';
+  const numberTitle = totalRounds > 1 ? `${roundIndex}/${totalRounds}. Tur — Sayı` : 'Sayı Turu';
 
   return (
     <div className="game">
@@ -141,18 +163,18 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
       </div>
 
       {phase === 'wordSelect' && (
-        <Panel title="1. Tur — Kelime">
+        <Panel title={wordTitle}>
           <LetterPicker chooserName={chooserName} onComplete={onLettersReady} />
         </Panel>
       )}
 
       {phase === 'wordPlay' && !armed && (
-        <Panel title="1. Tur — Kelime">
+        <Panel title={wordTitle}>
           <TurnGate name={players[humans[turnIdx]].name} onStart={() => setArmed(true)} />
         </Panel>
       )}
       {phase === 'wordPlay' && armed && (
-        <Panel title="1. Tur — Kelime">
+        <Panel title={wordTitle}>
           <WordPlay
             key={`w-${turnIdx}`}
             letters={letters}
@@ -167,7 +189,12 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
       {phase === 'wordResult' && (
         <Panel
           title="Kelime Turu Sonucu"
-          footer={<NextPhaseButton label="Sayı Turuna Geç →" onClick={() => setPhase('numberSelect')} />}
+          footer={
+            <NextPhaseButton
+              label={roundIndex < totalRounds ? 'Sonraki Tura Geç →' : 'Sonuçlar →'}
+              onClick={advanceRound}
+            />
+          }
         >
           <LetterTiles letters={letters} />
           <div className="results">
@@ -182,18 +209,18 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
       )}
 
       {phase === 'numberSelect' && (
-        <Panel title="2. Tur — Sayı">
+        <Panel title={numberTitle}>
           <NumberPicker chooserName={numberChooser} onComplete={onNumbersReady} />
         </Panel>
       )}
 
       {phase === 'numberPlay' && !armed && (
-        <Panel title="2. Tur — Sayı">
+        <Panel title={numberTitle}>
           <TurnGate name={players[humans[turnIdx]].name} onStart={() => setArmed(true)} />
         </Panel>
       )}
       {phase === 'numberPlay' && armed && (
-        <Panel title="2. Tur — Sayı">
+        <Panel title={numberTitle}>
           <NumberPlay
             key={`n-${turnIdx}`}
             numbers={numbers}
@@ -209,7 +236,12 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
       {phase === 'numberResult' && (
         <Panel
           title="Sayı Turu Sonucu"
-          footer={<NextPhaseButton label="Sonuçlar →" onClick={() => setPhase('gameOver')} />}
+          footer={
+            <NextPhaseButton
+              label={roundIndex < totalRounds ? 'Sonraki Tura Geç →' : 'Sonuçlar →'}
+              onClick={advanceRound}
+            />
+          }
         >
           <div className="target">Hedef: <strong>{target}</strong></div>
           <NumberTiles numbers={numbers} />
@@ -242,7 +274,8 @@ export default function OfflineGame({ mode, names, difficulty, onExit, onAwardCo
     setAnswers({});
     setWordResults(null);
     setNumberResults(null);
-    setPhase('wordSelect');
+    setRoundIndex(1);
+    setPhase(initialPhase);
     startTurn(0);
   }
 }

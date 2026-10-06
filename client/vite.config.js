@@ -7,6 +7,10 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // SW kaydı src/main.jsx içinde virtual:pwa-register ile elle yapılıyor
+      // (otomatik enjekte edilen registerSW.js periyodik güncelleme kontrolü
+      // yapmıyordu, bu yüzden güncellemeler cihazda güne kadar gecikiyordu).
+      injectRegister: false,
       includeAssets: ['apple-touch-icon.png'],
       manifest: {
         name: 'Harf & Sayı Düellosu',

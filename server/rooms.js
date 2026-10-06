@@ -28,6 +28,7 @@ const DEFAULT_SETTINGS = {
   maxPlayers: 2,
   totalRounds: 2,
   bigCountMode: 'random', // 'random', 1, 2, 3
+  roundMode: 'mixed', // 'mixed' (Kelime + Sayı) | 'word' (Sadece Kelime) | 'number' (Sadece Sayı)
 };
 
 function sanitizeSettings(settings = {}) {
@@ -46,8 +47,11 @@ function sanitizeSettings(settings = {}) {
   const bigCountMode = ['random', 1, 2, 3].includes(settings.bigCountMode)
     ? settings.bigCountMode
     : DEFAULT_SETTINGS.bigCountMode;
+  const roundMode = ['mixed', 'word', 'number'].includes(settings.roundMode)
+    ? settings.roundMode
+    : DEFAULT_SETTINGS.roundMode;
 
-  return { wordTimeMs, numberTimeMs, maxPlayers, totalRounds, bigCountMode };
+  return { wordTimeMs, numberTimeMs, maxPlayers, totalRounds, bigCountMode, roundMode };
 }
 
 const rooms = new Map(); // code -> room
@@ -127,6 +131,13 @@ export function createRoomManager(io) {
   }
 
   // ---- Tur akışı ----
+  function startRoundByIndex(room, index) {
+    const roundMode = room.settings?.roundMode || 'mixed';
+    if (roundMode === 'word') return startWordRound(room);
+    if (roundMode === 'number') return startNumberRound(room);
+    return index % 2 === 1 ? startWordRound(room) : startNumberRound(room);
+  }
+
   function startWordRound(room) {
     room.phase = 'word';
     const duration = room.settings?.wordTimeMs || WORD_TIME_MS;
@@ -187,11 +198,7 @@ export function createRoomManager(io) {
     const nextRound = () => {
       if (room.currentRoundIndex < room.settings.totalRounds) {
         room.currentRoundIndex++;
-        if (room.currentRoundIndex % 2 === 1) {
-          startWordRound(room);
-        } else {
-          startNumberRound(room);
-        }
+        startRoundByIndex(room, room.currentRoundIndex);
       } else {
         endGame(room);
       }
@@ -273,11 +280,7 @@ export function createRoomManager(io) {
     const nextRound = () => {
       if (room.currentRoundIndex < room.settings.totalRounds) {
         room.currentRoundIndex++;
-        if (room.currentRoundIndex % 2 === 1) {
-          startWordRound(room);
-        } else {
-          startNumberRound(room);
-        }
+        startRoundByIndex(room, room.currentRoundIndex);
       } else {
         endGame(room);
       }
@@ -423,7 +426,7 @@ export function createRoomManager(io) {
       if (room.phase !== 'lobby') return cb?.({ ok: false, error: 'Oyun zaten başladı' });
 
       room.currentRoundIndex = 1;
-      startWordRound(room);
+      startRoundByIndex(room, room.currentRoundIndex);
       cb?.({ ok: true });
     });
 
